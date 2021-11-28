@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "459374668387",
+    "firebase_url": "https://bookario-eac4f.firebaseio.com",
+    "project_id": "bookario-eac4f",
+    "storage_bucket": "bookario-eac4f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:459374668387:android:38b2fe46aa3a9b88b16656",
+        "android_client_info": {
+          "package_name": "com.pushhub.bookario"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "459374668387-hmj6h9nl60c9mafjs87n87nbg261gacq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6FUA2W-_1WG6SIjTuFH12P4tPczKnY-Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "459374668387-hmj6h9nl60c9mafjs87n87nbg261gacq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "459374668387-dm2lfn91b7g101ii4pq2vgpfdslp8h0l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pushhub.bookario"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:459374668387:android:0360f6ebc634148cb16656",
+        "android_client_info": {
+          "package_name": "com.pushhub.bookario_manager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "459374668387-hmj6h9nl60c9mafjs87n87nbg261gacq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6FUA2W-_1WG6SIjTuFH12P4tPczKnY-Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "459374668387-hmj6h9nl60c9mafjs87n87nbg261gacq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "459374668387-dm2lfn91b7g101ii4pq2vgpfdslp8h0l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pushhub.bookario"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

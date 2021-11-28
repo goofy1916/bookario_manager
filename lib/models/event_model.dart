@@ -2,7 +2,7 @@ import 'package:bookario_manager/models/pass_type_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EventModel {
-  final String id;
+  final String? id;
   final String clubId;
   final Timestamp dateTime;
   final String desc;
@@ -21,11 +21,12 @@ class EventModel {
   final int totalFemale;
   final int totalTable;
   final List? bookedPasses;
+  final List<String>? promoters;
 
   final int remainingPasses;
 
   EventModel({
-    required this.id,
+    this.id,
     required this.clubId,
     required this.dateTime,
     required this.desc,
@@ -44,6 +45,7 @@ class EventModel {
     required this.totalMale,
     required this.totalFemale,
     required this.totalTable,
+    this.promoters,
     this.bookedPasses,
   });
 
@@ -124,8 +126,12 @@ class EventModel {
       "stagMaleEntry": stagMaleEntryJson,
       "coupleEntry": coupleEntryJson,
       "tableOption": tableOptionJson,
+      "totalMale": totalMale,
+      "totalFemale": totalFemale,
+      "totalTable": totalTable,
       "bookedPasses": bookedPasses,
       "remainingPasses": remainingPasses,
+      "promoters": promoters
     };
   }
 }

@@ -1,14 +1,8 @@
-import 'dart:io';
-
 import 'package:bookario_manager/components/constants.dart';
-import 'package:bookario_manager/components/default_button.dart';
-import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/club_details.dart';
-import 'package:date_time_picker/date_time_picker.dart';
+import 'package:bookario_manager/screens/club_details/create_event/add_promoters.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:im_stepper/stepper.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:stacked/stacked.dart';
 
 import 'add_event_viewmodel.dart';
@@ -26,6 +20,7 @@ class AddEvent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<AddEventViewModel>.reactive(
+      onModelReady: (viewModel) => viewModel.getPromotersAndLocation(club),
       builder: (context, viewModel, child) {
         return Scaffold(
           appBar: AppBar(
@@ -52,12 +47,13 @@ class AddEvent extends StatelessWidget {
                           icon: const Icon(
                             Icons.arrow_back_ios,
                             color: kPrimaryColor,
+                            size: 12,
                           )),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: DotStepper(
                           // direction: Axis.vertical,
-                          dotCount: 4,
+                          dotCount: 3,
                           dotRadius: 6,
 
                           /// THIS MUST BE SET. SEE HOW IT IS CHANGED IN NEXT/PREVIOUS BUTTONS AND JUMP BUTTONS.
@@ -97,10 +93,13 @@ class AddEvent extends StatelessWidget {
                           icon: const Icon(
                             Icons.arrow_forward_ios,
                             color: kPrimaryColor,
+                            size: 12,
                           )),
                     ],
                   ),
-                  getChild(viewModel, context)
+                  Form(
+                      key: viewModel.formKey,
+                      child: getChild(viewModel, context)),
                 ],
               ),
             )),
@@ -115,7 +114,8 @@ class AddEvent extends StatelessWidget {
 getChild(AddEventViewModel viewModel, BuildContext context) {
   List<Widget> widgets = [
     basicEventDetails(viewModel, context),
-    addPasses(viewModel, context)
+    addPasses(viewModel, context),
+    addPromoters(viewModel, context)
   ];
   return widgets[viewModel.currentIndex];
 }
@@ -222,6 +222,15 @@ customNumberFormField(
       cursorColor: Colors.white70,
       // focusNode: viewModel.nameFocusNode,
       controller: fieldController,
+      validator: (String? val) {
+        if (val == null) {
+          return "Enter valid value!";
+        } else if (int.tryParse(val)! < 0) {
+          return "Value cannot be less than 0";
+        } else {
+          return null;
+        }
+      },
       decoration: InputDecoration(
         labelText: fieldTitle,
         hintText: fieldHint,
@@ -250,12 +259,18 @@ customTextFormField(
       cursorColor: Colors.white70,
       // focusNode: viewModel.nameFocusNode,
       controller: fieldController,
+
       decoration: InputDecoration(
         labelText: fieldTitle,
         hintText: fieldHint,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         // prefixIcon: CustomSuffixIcon(svgIcon: "assets/icons/User.svg"),
       ),
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return "Field cannot be empty";
+        }
+      },
       // onFieldSubmitted: (value) {
       //   viewModel.nameFocusNode.unfocus();
       //   FocusScope.of(context).requestFocus(viewModel.phoneNumberFocusNode);

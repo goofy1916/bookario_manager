@@ -4,6 +4,8 @@ class PassType {
   final String type;
   final int? allowed;
 
+  PassType(this.cover, this.entry, this.type, this.allowed);
+
   PassType.fromJson(Map<String, dynamic> json)
       : type = json['type'] as String,
         cover = double.parse(json['cover'].toString()),

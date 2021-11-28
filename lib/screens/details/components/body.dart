@@ -22,7 +22,7 @@ class Body extends StatelessWidget {
                 Stack(
                   children: [
                     Hero(
-                      tag: event.id,
+                      tag: event.id!,
                       child: Image.network(
                         event.eventThumbnail,
                         fit: BoxFit.cover,

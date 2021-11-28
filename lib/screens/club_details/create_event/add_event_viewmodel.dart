@@ -1,6 +1,14 @@
 import 'dart:io';
 
+import 'package:bookario_manager/app.locator.dart';
+import 'package:bookario_manager/models/club_details.dart';
+import 'package:bookario_manager/models/event_model.dart';
+import 'package:bookario_manager/models/pass_type_model.dart';
+import 'package:bookario_manager/models/promoter_model.dart';
+import 'package:bookario_manager/services/firebase_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:stacked/stacked.dart';
 
 const String couple = "Couple";
@@ -13,6 +21,10 @@ const String totalCoverController = "totalCoverController";
 const String totalAllowedController = "totalAllowedController";
 
 class AddEventViewModel extends IndexTrackingViewModel {
+  final FirebaseService _firebaseService = locator<FirebaseService>();
+
+  late ClubDetails club;
+
   final formKey = GlobalKey<FormState>();
 
   FocusNode eventNameFocusNode = FocusNode();
@@ -84,6 +96,8 @@ class AddEventViewModel extends IndexTrackingViewModel {
     }
   ];
 
+  List<PromoterModel> promoters = [];
+
   int couplePassIndex = 0;
 
   int malePassIndex = 0;
@@ -92,9 +106,26 @@ class AddEventViewModel extends IndexTrackingViewModel {
 
   int femalePassIndex = 0;
 
+  TextEditingController tableCountTextController = TextEditingController();
+
+  List<String> locations = [];
+
+  String? location;
+
+  List<PromoterModel> selectedPromoters = [];
+
   void updateShowRatio() {
     showRatio = !showRatio;
     notifyListeners();
+  }
+
+  Future<void> imgFromGallery() async {
+    final XFile? image = await ImagePicker().pickImage(
+        source: ImageSource.gallery, imageQuality: 50, maxHeight: 500);
+    if (image != null) {
+      coverPhoto = File(image.path);
+      notifyListeners();
+    }
   }
 
   void updateAddPassType(String passType) {
@@ -116,6 +147,11 @@ class AddEventViewModel extends IndexTrackingViewModel {
   }
 
   void addPass() {
+    final newEntry = {
+      "passNameController": TextEditingController(),
+      "totalCostController": TextEditingController(),
+      "totalCoverController": TextEditingController()
+    };
     if (selectedPassType == couple) {
       couplePasses[couplePassIndex]['passTitle'] = couple +
           "\n" +
@@ -125,11 +161,7 @@ class AddEventViewModel extends IndexTrackingViewModel {
           ", Cover : " +
           couplePasses[couplePassIndex][totalCoverController].text;
       couplePassIndex++;
-      couplePasses.add({
-        "passNameController": TextEditingController(),
-        "totalCostController": TextEditingController(),
-        "totalCoverController": TextEditingController()
-      });
+      couplePasses.add(newEntry);
     }
     if (selectedPassType == male) {
       malePasses[malePassIndex]['passTitle'] = male +
@@ -139,11 +171,7 @@ class AddEventViewModel extends IndexTrackingViewModel {
           malePasses[malePassIndex][totalCostController].text +
           ", Cover : " +
           malePasses[malePassIndex][totalCoverController].text;
-      malePasses.add({
-        "passNameController": TextEditingController(),
-        "totalCostController": TextEditingController(),
-        "totalCoverController": TextEditingController()
-      });
+      malePasses.add(newEntry);
       malePassIndex++;
     }
     if (selectedPassType == female) {
@@ -154,11 +182,7 @@ class AddEventViewModel extends IndexTrackingViewModel {
           femalePasses[femalePassIndex][totalCostController].text +
           ", Cover : " +
           femalePasses[femalePassIndex][totalCoverController].text;
-      femalePasses.add({
-        "passNameController": TextEditingController(),
-        "totalCostController": TextEditingController(),
-        "totalCoverController": TextEditingController()
-      });
+      femalePasses.add(newEntry);
       femalePassIndex++;
     }
     if (selectedPassType == table) {
@@ -200,5 +224,114 @@ class AddEventViewModel extends IndexTrackingViewModel {
       tablePassIndex = tablePasses.length - 1;
     }
     notifyListeners();
+  }
+
+  getPromotersAndLocation(ClubDetails currentClub) async {
+    setBusy(true);
+    club = currentClub;
+    promoters = await _firebaseService.getPromoters();
+    locations = await _firebaseService.getLocations();
+    setBusy(false);
+  }
+
+  updateSelectedPromoters(List<PromoterModel> selection) {
+    selectedPromoters = selection;
+    notifyListeners();
+  }
+
+  removePromoter(String title) {
+    selectedPromoters.removeWhere((element) => element.name == title);
+    notifyListeners();
+  }
+
+  createEvent() async {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+
+      List<PassType> femaleEntry = femalePasses
+          .map((pass) => PassType(
+              double.tryParse(
+                      (pass[totalCoverController] as TextEditingController)
+                          .text) ??
+                  0,
+              double.tryParse(
+                      (pass[totalCostController] as TextEditingController)
+                          .text) ??
+                  1,
+              pass[passNameController].text,
+              null))
+          .toList();
+
+      List<PassType> maleEntry = malePasses
+          .map((pass) => PassType(
+              double.tryParse(
+                      (pass[totalCoverController] as TextEditingController)
+                          .text) ??
+                  0,
+              double.tryParse(
+                      (pass[totalCostController] as TextEditingController)
+                          .text) ??
+                  1,
+              pass[passNameController].text,
+              null))
+          .toList();
+
+      List<PassType> coupleEntry = couplePasses
+          .map((pass) => PassType(
+              double.tryParse(
+                      (pass[totalCoverController] as TextEditingController)
+                          .text) ??
+                  0,
+              double.tryParse(
+                      (pass[totalCostController] as TextEditingController)
+                          .text) ??
+                  1,
+              pass[passNameController].text,
+              null))
+          .toList();
+
+      List<PassType> tableEntry = tablePasses
+          .map((pass) => PassType(
+              double.tryParse(
+                      (pass[totalCoverController] as TextEditingController)
+                          .text) ??
+                  0,
+              double.tryParse(
+                      (pass[totalCostController] as TextEditingController)
+                          .text) ??
+                  1,
+              pass[passNameController].text,
+              int.tryParse((pass[totalCoverController] as TextEditingController)
+                      .text) ??
+                  0))
+          .toList();
+
+      String thumbnailURL = await _firebaseService.uploadImageToFirebase(
+          coverPhoto!, eventNameTextController.text);
+
+      EventModel event = EventModel(
+          clubId: "club.id",
+          dateTime: Timestamp.fromDate(
+              DateTime.tryParse(dateTimeTextController.text)!),
+          desc: eventDescriptionTextController.text,
+          maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
+          name: eventNameTextController.text,
+          femaleRatio: int.tryParse(femaleRatioTextController.text) ?? 1,
+          maleRatio: int.tryParse(maleRatioTextController.text) ?? 1,
+          eventThumbnail: "eventThumbnail",
+          location: location!,
+          stagFemaleEntry: femaleEntry,
+          stagMaleEntry: maleEntry,
+          coupleEntry: coupleEntry,
+          tableOption: tableEntry,
+          remainingPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
+          maxTables: int.tryParse(tableCountTextController.text) ?? 0,
+          totalMale: int.tryParse(maleCountTextController.text) ?? 0,
+          totalFemale: int.tryParse(femaleCountTextController.text) ?? 0,
+          totalTable: int.tryParse(tableCountTextController.text) ?? 0,
+          promoters: selectedPromoters.map((e) => e.promoterId).toList());
+
+      print("Created Event: " + event.toJson().toString());
+    }
   }
 }

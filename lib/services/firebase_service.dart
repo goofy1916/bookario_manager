@@ -1,9 +1,12 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:bookario_manager/models/club_details.dart';
 import 'package:bookario_manager/models/event_model.dart';
+import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart' as fs;
 
 class FirebaseService {
   final CollectionReference _usersCollectionReference =
@@ -12,6 +15,10 @@ class FirebaseService {
       FirebaseFirestore.instance.collection('clubs');
   final CollectionReference _eventsCollectionReference =
       FirebaseFirestore.instance.collection('events');
+  final CollectionReference _promotersCollectionReference =
+      FirebaseFirestore.instance.collection('promoters');
+  final CollectionReference _locationsCollectionReference =
+      FirebaseFirestore.instance.collection('locations');
 
   Future updateUser(
     UserModel user,
@@ -70,5 +77,34 @@ class FirebaseService {
     }
 
     return events;
+  }
+
+  Future<List<PromoterModel>> getPromoters() async {
+    List<PromoterModel> promoters = [];
+    final response = await _promotersCollectionReference.get();
+    for (final doc in response.docs) {
+      promoters.add(PromoterModel.fromJson(doc.data() as Map<String, dynamic>));
+    }
+    return promoters;
+  }
+
+  Future<List<String>> getLocations() async {
+    List<String> locations = [];
+    final response = await _locationsCollectionReference.get();
+    for (final doc in response.docs) {
+      locations.add((doc.data() as Map<String, dynamic>)['location']);
+    }
+    return locations;
+  }
+
+  Future uploadImageToFirebase(File imageFile, String eventName) async {
+    fs.Reference firebaseStorageRef =
+        fs.FirebaseStorage.instance.ref().child('eventsThumbnails/$eventName');
+    fs.UploadTask uploadTask = firebaseStorageRef.putFile(imageFile);
+    fs.TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+    taskSnapshot.ref.getDownloadURL().then(
+          (value) => print("Done: $value"),
+        );
+    return taskSnapshot.ref.getDownloadURL();
   }
 }

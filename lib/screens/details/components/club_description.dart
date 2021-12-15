@@ -1,8 +1,10 @@
 import 'package:bookario_manager/components/constants.dart';
+import 'package:bookario_manager/components/default_button.dart';
 import 'package:bookario_manager/components/size_config.dart';
+import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
+import 'package:bookario_manager/screens/details/details_screen_viewmodel.dart';
 import 'package:clipboard/clipboard.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -10,12 +12,14 @@ import 'all_prices.dart';
 import 'description_text.dart';
 
 class EventDescription extends StatelessWidget {
-  EventDescription({
+  const EventDescription({
     Key? key,
     required this.event,
+    required this.viewModel,
   }) : super(key: key);
 
   final EventModel event;
+  final DetailsScreenViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -92,178 +96,202 @@ class EventDescription extends StatelessWidget {
         ),
         AllPrices(event: event),
         const SizedBox(height: 20),
-        SizedBox(
-          width: SizeConfig.screenWidth,
-          child: MaterialButton(
-            color: Colors.grey[800],
-            onPressed: () {
-              promoterPopUp(context);
-            },
-            child: const Text(
-              "Are you a promoter?",
-              style: TextStyle(color: Colors.white70),
+        const Divider(
+          color: Colors.white,
+        ),
+        if (viewModel.addNewCoupon)
+          CouponForm(viewModel: viewModel)
+        else
+          SizedBox(
+            width: SizeConfig.screenWidth,
+            child: Column(
+              children: [
+                if (!viewModel.busy("coupons") &&
+                    viewModel.couponsForEvent.isNotEmpty) ...[
+                  whiteTextField("Coupons for this event:"),
+                  Column(
+                    children: viewModel.couponsForEvent
+                        .map(
+                          (coupon) => ListTile(
+                            title: Card(
+                              color: kSecondaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: getCouponDetails(coupon),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
+                MaterialButton(
+                  color: Colors.grey[800],
+                  onPressed: () {
+                    viewModel.newCoupon();
+                  },
+                  child: const Text(
+                    "Add coupon",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ],
             ),
-          ),
-        )
+          )
       ],
     );
   }
 
-  Future promoterPopUp(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[900],
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(5),
-            ),
-          ),
-          title: Text(
-            "Enter your Promoter ID:",
-            style: Theme.of(context)
-                .textTheme
-                .headline6!
-                .copyWith(fontSize: 17, color: Colors.white),
-          ),
-          content: promoterCodeFormField(),
-          actions: <Widget>[
-            MaterialButton(
-              onPressed: () async {
-                try {
-                  // if (promoterCode.text.isNotEmpty) {
-                  //   final response = await Networking.getData(
-                  //       'promoters/get-promoter-coupon', {
-                  //     'clubId': widget.clubData['clubId'].toString(),
-                  //     'eventId': event['eventId'].toString(),
-                  //     'promoterId': promoterCode.text.trim(),
-                  //   });
-                  //   if (response['success']) {
-                  //     promoterCode.clear();
-                  //     Navigator.pop(context);
-                  //     showCoupons(context, response['data']);
-                  //   } else {
-                  //     Navigator.pop(context);
-                  //     promoterError(context, response['message']);
-                  //   }
-                  // }
-                } catch (e) {
-                  print(e);
-                }
-              },
-              splashColor: Colors.red[50],
-              child: Text(
-                "Get Coupons",
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1!
-                    .copyWith(color: kSecondaryColor),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+  whiteTextField18(String text) {
+    return Text(text,
+        style: const TextStyle(color: Colors.white, fontSize: 18));
   }
 
-  Future showCoupons(BuildContext context, List allCoupons) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[900],
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(5),
-            ),
-          ),
-          title: Text(
-            "Coupons for this event: ",
-            style: Theme.of(context)
-                .textTheme
-                .headline6!
-                .copyWith(fontSize: 17, color: Colors.white),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ...List.generate(allCoupons.length, (index) {
-                return CouponCard(allCoupons: allCoupons, index: index);
-              })
-            ],
-          ),
-          actions: <Widget>[
-            MaterialButton(
-              onPressed: () async {
-                Navigator.pop(context);
-              },
-              splashColor: Colors.red[50],
-              child: Text(
-                "Ok",
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1!
-                    .copyWith(color: kSecondaryColor),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+  whiteTextField(String text) {
+    return Text(text,
+        style: const TextStyle(color: Colors.white, fontSize: 12));
   }
 
-  Future promoterError(BuildContext context, String errorMessage) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[900],
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(5),
-            ),
-          ),
-          title: Text(
-            errorMessage,
-            style: Theme.of(context)
-                .textTheme
-                .headline6!
-                .copyWith(fontSize: 17, color: Colors.white),
-          ),
-          actions: <Widget>[
-            MaterialButton(
-              onPressed: () async {
-                Navigator.pop(context);
-              },
-              splashColor: Colors.red[50],
-              child: Text(
-                "Ok",
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1!
-                    .copyWith(color: kSecondaryColor),
-              ),
-            ),
-          ],
-        );
-      },
+  getCouponDetails(CouponModel coupon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (coupon.percentOff != null) ...[
+          whiteTextField18("Coupon type: Percent"),
+          whiteTextField(
+              "Percent off: ${coupon.percentOff}%, Max discount: Rs.${coupon.maxAmount},"),
+          whiteTextField(
+              "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
+          whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
+        ] else ...[
+          whiteTextField18("Coupon type: Flat off"),
+          whiteTextField("Max discount: Rs.${coupon.maxAmount},"),
+          whiteTextField(
+              "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
+          whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
+        ]
+      ],
     );
   }
+}
 
-  final promoterCode = TextEditingController();
+class CouponForm extends StatelessWidget {
+  const CouponForm({
+    Key? key,
+    required this.viewModel,
+  }) : super(key: key);
 
-  TextFormField promoterCodeFormField() {
-    return TextFormField(
-      style: const TextStyle(color: Colors.white70),
-      keyboardType: TextInputType.text,
-      cursorColor: Colors.white70,
-      textInputAction: TextInputAction.done,
-      controller: promoterCode,
-      decoration: const InputDecoration(
-        labelText: "Promoter ID",
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-      ),
+  final DetailsScreenViewModel viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Type : ",
+                style: viewModel.textStyle.copyWith(color: kSecondaryColor)),
+            DropdownButton<String>(
+              dropdownColor: Colors.grey,
+              items: const [
+                DropdownMenuItem(
+                    child: Text(
+                      "Percent",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                    value: "Percent"),
+                DropdownMenuItem(
+                    child: Text("Flat off",
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
+                    value: "Flat off"),
+              ],
+              value: viewModel.couponType,
+              onChanged: (value) => viewModel.updateCouponType(value!),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (viewModel.couponType == "Percent")
+          TextFormField(
+            style: const TextStyle(color: Colors.white70),
+            keyboardType: TextInputType.number,
+            cursorColor: Colors.white70,
+            textInputAction: TextInputAction.done,
+            controller: viewModel.percentOff,
+            decoration: const InputDecoration(
+              labelText: "Percent",
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+            ),
+          ),
+        const SizedBox(height: 12),
+        TextFormField(
+          style: const TextStyle(color: Colors.white70),
+          keyboardType: TextInputType.number,
+          cursorColor: Colors.white70,
+          textInputAction: TextInputAction.done,
+          controller: viewModel.maxDiscount,
+          decoration: const InputDecoration(
+            labelText: "Max discount (in rupees)",
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          style: const TextStyle(color: Colors.white70),
+          keyboardType: TextInputType.number,
+          cursorColor: Colors.white70,
+          textInputAction: TextInputAction.done,
+          controller: viewModel.maxCoupons,
+          decoration: const InputDecoration(
+            labelText: "Max coupons",
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          style: const TextStyle(color: Colors.white70),
+          keyboardType: TextInputType.number,
+          cursorColor: Colors.white70,
+          textInputAction: TextInputAction.done,
+          controller: viewModel.minAmounRequired,
+          decoration: const InputDecoration(
+            labelText: "Min amount",
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DefaultButton(
+                text: "Cancel",
+                press: () {
+                  viewModel.cancelCoupon();
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DefaultButton(
+                text: "Add",
+                press: () {
+                  viewModel.addCoupon();
+                },
+              ),
+            )
+          ],
+        )
+      ],
     );
   }
 }

@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:bookario_manager/models/club_details.dart';
+import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
 import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/models/user_model.dart';
@@ -72,6 +74,7 @@ class FirebaseService {
         .where("clubId", isEqualTo: clubId)
         .get();
     for (final doc in response.docs) {
+      log(doc.data().toString());
       events.add(
           EventModel.fromJson(doc.data()! as Map<String, dynamic>, doc.id));
     }
@@ -106,5 +109,30 @@ class FirebaseService {
           (value) => print("Done: $value"),
         );
     return taskSnapshot.ref.getDownloadURL();
+  }
+
+  Future<void> createEvent(Map<String, dynamic> json) async {
+    await _eventsCollectionReference.doc().set(json);
+  }
+
+  void addCoupon(
+      {required String eventId, required Map<String, dynamic> coupon}) {
+    _eventsCollectionReference
+        .doc(eventId)
+        .collection("coupons")
+        .doc()
+        .set(coupon);
+  }
+
+  Future<List<CouponModel>> getCouponsForEvent({String? eventId}) async {
+    List<CouponModel> coupons = [];
+    var response = await _eventsCollectionReference
+        .doc(eventId)
+        .collection("coupons")
+        .get();
+    for (final doc in response.docs) {
+      coupons.add(CouponModel.fromJson(doc.data()));
+    }
+    return coupons;
   }
 }

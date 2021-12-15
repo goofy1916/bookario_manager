@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:bookario_manager/app.locator.dart';
@@ -10,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked_services/stacked_services.dart';
 
 const String couple = "Couple";
 const String male = "Male";
@@ -97,15 +99,6 @@ class AddEventViewModel extends IndexTrackingViewModel {
   ];
 
   List<PromoterModel> promoters = [];
-
-  int couplePassIndex = 0;
-
-  int malePassIndex = 0;
-
-  int tablePassIndex = 0;
-
-  int femalePassIndex = 0;
-
   TextEditingController tableCountTextController = TextEditingController();
 
   List<String> locations = [];
@@ -147,61 +140,58 @@ class AddEventViewModel extends IndexTrackingViewModel {
   }
 
   void addPass() {
-    final newEntry = {
+    final newEntry = <String, dynamic>{
       "passNameController": TextEditingController(),
       "totalCostController": TextEditingController(),
       "totalCoverController": TextEditingController()
     };
     if (selectedPassType == couple) {
-      couplePasses[couplePassIndex]['passTitle'] = couple +
+      couplePasses[couplePasses.length - 1]['passTitle'] = couple +
           "\n" +
-          couplePasses[couplePassIndex][passNameController].text +
+          couplePasses[couplePasses.length - 1][passNameController].text +
           ": Cost : " +
-          couplePasses[couplePassIndex][totalCostController].text +
+          couplePasses[couplePasses.length - 1][totalCostController].text +
           ", Cover : " +
-          couplePasses[couplePassIndex][totalCoverController].text;
-      couplePassIndex++;
+          couplePasses[couplePasses.length - 1][totalCoverController].text;
+
       couplePasses.add(newEntry);
     }
     if (selectedPassType == male) {
-      malePasses[malePassIndex]['passTitle'] = male +
+      malePasses[malePasses.length - 1]['passTitle'] = male +
           " Stag\n" +
-          malePasses[malePassIndex][passNameController].text +
+          malePasses[malePasses.length - 1][passNameController].text +
           ": Cost : " +
-          malePasses[malePassIndex][totalCostController].text +
+          malePasses[malePasses.length - 1][totalCostController].text +
           ", Cover : " +
-          malePasses[malePassIndex][totalCoverController].text;
+          malePasses[malePasses.length - 1][totalCoverController].text;
       malePasses.add(newEntry);
-      malePassIndex++;
     }
     if (selectedPassType == female) {
-      femalePasses[femalePassIndex]['passTitle'] = female +
+      femalePasses[femalePasses.length - 1]['passTitle'] = female +
           " Stag\n" +
-          femalePasses[femalePassIndex][passNameController].text +
+          femalePasses[femalePasses.length - 1][passNameController].text +
           ": Cost : " +
-          femalePasses[femalePassIndex][totalCostController].text +
+          femalePasses[femalePasses.length - 1][totalCostController].text +
           ", Cover : " +
-          femalePasses[femalePassIndex][totalCoverController].text;
+          femalePasses[femalePasses.length - 1][totalCoverController].text;
       femalePasses.add(newEntry);
-      femalePassIndex++;
     }
     if (selectedPassType == table) {
-      tablePasses[tablePassIndex]['passTitle'] = table +
+      tablePasses[tablePasses.length - 1]['passTitle'] = table +
           "\n" +
-          tablePasses[tablePassIndex][passNameController].text +
+          tablePasses[tablePasses.length - 1][passNameController].text +
           ": Cost : " +
-          tablePasses[tablePassIndex][totalCostController].text +
+          tablePasses[tablePasses.length - 1][totalCostController].text +
           ", Cover : " +
-          tablePasses[tablePassIndex][totalCoverController].text +
+          tablePasses[tablePasses.length - 1][totalCoverController].text +
           ", Allowed : " +
-          tablePasses[tablePassIndex][totalAllowedController].text;
+          tablePasses[tablePasses.length - 1][totalAllowedController].text;
       tablePasses.add({
         "passNameController": TextEditingController(),
         "totalCostController": TextEditingController(),
         "totalCoverController": TextEditingController(),
         totalAllowedController: TextEditingController()
       });
-      tablePassIndex++;
     }
     notifyListeners();
   }
@@ -209,19 +199,15 @@ class AddEventViewModel extends IndexTrackingViewModel {
   removePass(String type, String title) {
     if (type == couple) {
       couplePasses.removeWhere((element) => element['passTitle'] == title);
-      couplePassIndex = couplePasses.length - 1;
     }
     if (type == male) {
       malePasses.removeWhere((element) => element['passTitle'] == title);
-      malePassIndex = malePasses.length - 1;
     }
     if (type == female) {
       femalePasses.removeWhere((element) => element['passTitle'] == title);
-      femalePassIndex = femalePasses.length - 1;
     }
     if (type == table) {
       tablePasses.removeWhere((element) => element['passTitle'] == title);
-      tablePassIndex = tablePasses.length - 1;
     }
     notifyListeners();
   }
@@ -245,93 +231,103 @@ class AddEventViewModel extends IndexTrackingViewModel {
   }
 
   createEvent() async {
-    if (formKey.currentState!.validate()) {
-      formKey.currentState!.save();
+    try {
+      if (formKey.currentState!.validate()) {
+        formKey.currentState!.save();
+        femalePasses.removeWhere((element) {
+          return element[passNameController].text == "";
+        });
+        malePasses
+            .removeWhere((element) => element[passNameController].text == "");
+        couplePasses
+            .removeWhere((element) => element[passNameController].text == "");
+        tablePasses
+            .removeWhere((element) => element[passNameController].text == "");
 
-      List<PassType> femaleEntry = femalePasses
-          .map((pass) => PassType(
-              double.tryParse(
-                      (pass[totalCoverController] as TextEditingController)
-                          .text) ??
-                  0,
-              double.tryParse(
-                      (pass[totalCostController] as TextEditingController)
-                          .text) ??
-                  1,
-              pass[passNameController].text,
-              null))
-          .toList();
+        List<PassType> femaleEntry = femalePasses
+            .map((pass) => PassType(
+                double.tryParse(
+                        (pass[totalCoverController] as TextEditingController)
+                            .text) ??
+                    0,
+                double.parse(
+                    (pass[totalCostController] as TextEditingController).text),
+                pass[passNameController].text,
+                null))
+            .toList();
 
-      List<PassType> maleEntry = malePasses
-          .map((pass) => PassType(
-              double.tryParse(
-                      (pass[totalCoverController] as TextEditingController)
-                          .text) ??
-                  0,
-              double.tryParse(
-                      (pass[totalCostController] as TextEditingController)
-                          .text) ??
-                  1,
-              pass[passNameController].text,
-              null))
-          .toList();
+        List<PassType> maleEntry = malePasses
+            .map((pass) => PassType(
+                double.tryParse(
+                        (pass[totalCoverController] as TextEditingController)
+                            .text) ??
+                    0,
+                double.parse(
+                    (pass[totalCostController] as TextEditingController).text),
+                pass[passNameController].text,
+                null))
+            .toList();
 
-      List<PassType> coupleEntry = couplePasses
-          .map((pass) => PassType(
-              double.tryParse(
-                      (pass[totalCoverController] as TextEditingController)
-                          .text) ??
-                  0,
-              double.tryParse(
-                      (pass[totalCostController] as TextEditingController)
-                          .text) ??
-                  1,
-              pass[passNameController].text,
-              null))
-          .toList();
+        List<PassType> coupleEntry = couplePasses
+            .map((pass) => PassType(
+                double.tryParse(
+                        (pass[totalCoverController] as TextEditingController)
+                            .text) ??
+                    0,
+                double.parse(
+                    (pass[totalCostController] as TextEditingController).text),
+                pass[passNameController].text,
+                null))
+            .toList();
 
-      List<PassType> tableEntry = tablePasses
-          .map((pass) => PassType(
-              double.tryParse(
-                      (pass[totalCoverController] as TextEditingController)
-                          .text) ??
-                  0,
-              double.tryParse(
-                      (pass[totalCostController] as TextEditingController)
-                          .text) ??
-                  1,
-              pass[passNameController].text,
-              int.tryParse((pass[totalCoverController] as TextEditingController)
-                      .text) ??
-                  0))
-          .toList();
+        List<PassType> tableEntry = tablePasses
+            .map((pass) => PassType(
+                double.tryParse(
+                        (pass[totalCoverController] as TextEditingController)
+                            .text) ??
+                    0,
+                double.parse(
+                    (pass[totalCostController] as TextEditingController).text),
+                pass[passNameController].text,
+                int.parse(
+                    (pass[totalAllowedController] as TextEditingController)
+                        .text)))
+            .toList();
 
-      String thumbnailURL = await _firebaseService.uploadImageToFirebase(
-          coverPhoto!, eventNameTextController.text);
+        String thumbnailURL = await _firebaseService.uploadImageToFirebase(
+            coverPhoto!, eventNameTextController.text);
 
-      EventModel event = EventModel(
-          clubId: "club.id",
-          dateTime: Timestamp.fromDate(
-              DateTime.tryParse(dateTimeTextController.text)!),
-          desc: eventDescriptionTextController.text,
-          maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
-          name: eventNameTextController.text,
-          femaleRatio: int.tryParse(femaleRatioTextController.text) ?? 1,
-          maleRatio: int.tryParse(maleRatioTextController.text) ?? 1,
-          eventThumbnail: "eventThumbnail",
-          location: location!,
-          stagFemaleEntry: femaleEntry,
-          stagMaleEntry: maleEntry,
-          coupleEntry: coupleEntry,
-          tableOption: tableEntry,
-          remainingPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
-          maxTables: int.tryParse(tableCountTextController.text) ?? 0,
-          totalMale: int.tryParse(maleCountTextController.text) ?? 0,
-          totalFemale: int.tryParse(femaleCountTextController.text) ?? 0,
-          totalTable: int.tryParse(tableCountTextController.text) ?? 0,
-          promoters: selectedPromoters.map((e) => e.promoterId).toList());
+        EventModel event = EventModel(
+            clubId: club.id,
+            dateTime: Timestamp.fromDate(
+                DateTime.tryParse(dateTimeTextController.text)!),
+            desc: eventDescriptionTextController.text,
+            maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
+            name: eventNameTextController.text,
+            femaleRatio: int.tryParse(femaleRatioTextController.text) ?? 1,
+            maleRatio: int.tryParse(maleRatioTextController.text) ?? 1,
+            eventThumbnail: thumbnailURL,
+            location: location!,
+            stagFemaleEntry: femaleEntry,
+            stagMaleEntry: maleEntry,
+            coupleEntry: coupleEntry,
+            tableOption: tableEntry,
+            bookedPasses: <String>[],
+            remainingPasses:
+                int.tryParse(totalCapacityTextController.text) ?? 0,
+            maxTables: int.tryParse(tableCountTextController.text) ?? 0,
+            totalMale: int.tryParse(maleCountTextController.text) ?? 0,
+            totalFemale: int.tryParse(femaleCountTextController.text) ?? 0,
+            totalTable: int.tryParse(tableCountTextController.text) ?? 0,
+            promoters: selectedPromoters.map((e) => e.promoterId).toList());
 
-      print("Created Event: " + event.toJson().toString());
+        log("Created Event: " + event.toJson().toString());
+        await _firebaseService.createEvent(event.toJson());
+      }
+    } catch (e) {
+      await locator<DialogService>().showDialog(
+          title: "Something went wrong!",
+          description: "Please check all the fields have valid data!");
     }
   }
 }

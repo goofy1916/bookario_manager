@@ -15,20 +15,17 @@ class DefaultButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: SizeConfig.screenWidth * 0.7,
-      height: SizeConfig.orientation == Orientation.portrait
-          ? SizeConfig.screenHeight * .07
-          : SizeConfig.screenHeight * .1,
+      // width: SizeConfig.screenWidth * 0.7,
+      // height: SizeConfig.orientation == Orientation.portrait
+      //     ? SizeConfig.screenHeight * .07
+      //     : SizeConfig.screenHeight * .1,
       child: MaterialButton(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         color: kSecondaryColor,
         onPressed: press,
         child: Text(
           text.toString(),
-          style: TextStyle(
-            fontSize: SizeConfig.orientation == Orientation.portrait
-                ? SizeConfig.screenHeight * .03
-                : SizeConfig.screenHeight * .05,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),

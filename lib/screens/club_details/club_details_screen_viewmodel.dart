@@ -14,14 +14,14 @@ class ClubDetailsViewModel extends BaseViewModel {
   List<EventModel> myEvents = [];
 
   getMyEvents(ClubDetails club) async {
-    try {
-      myEvents = await _firebaseService.getMyEvents(club.id);
-      if (myEvents.isNotEmpty) {
-        hasEvents = true;
-      }
-      notifyListeners();
-    } catch (e) {
-      log("Club Details ViewModel" + e.toString());
+    // try {
+    myEvents = await _firebaseService.getMyEvents(club.id);
+    if (myEvents.isNotEmpty) {
+      hasEvents = true;
     }
+    notifyListeners();
+    // } catch (e) {
+    //   log("Club Details ViewModel" + e.toString());
+    // }
   }
 }

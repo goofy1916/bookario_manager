@@ -3,8 +3,8 @@ import 'package:bookario_manager/components/default_button.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/club_details.dart';
 import 'package:bookario_manager/screens/club_details/club_details_screen_viewmodel.dart';
-import 'package:bookario_manager/screens/club_details/create_event/add_event.dart';
 import 'package:bookario_manager/screens/club_details/club_event/club_events.dart';
+import 'package:bookario_manager/screens/create_event/add_event.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -92,7 +92,7 @@ class Body extends StatelessWidget {
                     child: DefaultButton(
                       text: "Add Event",
                       press: () async {
-                        final bool eventAdded = await Navigator.push(
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => AddEvent(club: club),

@@ -1,12 +1,12 @@
 import 'package:bookario_manager/components/constants.dart';
 import 'package:bookario_manager/models/club_details.dart';
-import 'package:bookario_manager/screens/club_details/create_event/add_promoters.dart';
 import 'package:flutter/material.dart';
 import 'package:im_stepper/stepper.dart';
 import 'package:stacked/stacked.dart';
 
 import 'add_event_viewmodel.dart';
 import 'add_passes.dart';
+import 'add_promoters.dart';
 import 'basic_event_details.dart';
 
 class AddEvent extends StatelessWidget {
@@ -86,7 +86,7 @@ class AddEvent extends StatelessWidget {
                       ),
                       IconButton(
                           onPressed: () {
-                            if (viewModel.currentIndex < 3) {
+                            if (viewModel.currentIndex < 2) {
                               viewModel.setIndex(viewModel.currentIndex + 1);
                             }
                           },
@@ -115,7 +115,7 @@ getChild(AddEventViewModel viewModel, BuildContext context) {
   List<Widget> widgets = [
     basicEventDetails(viewModel, context),
     addPasses(viewModel, context),
-    addPromoters(viewModel, context)
+    addPromoters(viewModel, context),
   ];
   return widgets[viewModel.currentIndex];
 }

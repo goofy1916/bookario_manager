@@ -7,7 +7,7 @@ class EventModel {
   final Timestamp dateTime;
   final String desc;
   final int maxPasses;
-  final int maxTables;
+  final int? maxTables;
   final String name;
   final int femaleRatio;
   final int maleRatio;
@@ -21,7 +21,7 @@ class EventModel {
   final int totalFemale;
   final int totalTable;
   final List? bookedPasses;
-  final List<String>? promoters;
+  final List? promoters;
 
   final int remainingPasses;
 
@@ -41,7 +41,7 @@ class EventModel {
     required this.coupleEntry,
     required this.tableOption,
     required this.remainingPasses,
-    required this.maxTables,
+    this.maxTables,
     required this.totalMale,
     required this.totalFemale,
     required this.totalTable,
@@ -96,11 +96,11 @@ class EventModel {
       coupleEntry: coupleEntry,
       tableOption: tableOption,
       remainingPasses: json['remainingPasses'] as int,
-      bookedPasses: json['bookedPasses'] as List,
-      maxTables: json['maxTables'] as int,
+      bookedPasses: (json['bookedPasses'] as List?) ?? [],
       totalMale: json['totalMale'] as int,
       totalFemale: json['totalFemale'] as int,
       totalTable: json['totalTable'] as int,
+      promoters: (json['promoters'] as List?) ?? [],
     );
   }
   Map<String, dynamic> toJson() {

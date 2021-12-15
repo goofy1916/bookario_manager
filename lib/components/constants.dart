@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 const kPrimaryColor = Color(0xFFFFFFFF);
 const kPrimaryLightColor = Color(0xFFFFFFFF);
 const kSecondaryColor = Color(0xFFD4005C);
-const kTextColor = Color(0xFF757575);
+const kTextColor = Color(0xFFFFFFFF);
 
 const kAnimationDuration = Duration(milliseconds: 200);
 

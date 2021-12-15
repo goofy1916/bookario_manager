@@ -4,14 +4,15 @@ import 'components/constants.dart';
 
 ThemeData theme() {
   return ThemeData(
-      primaryColor: Color(0xFF1E1D1D),
-      scaffoldBackgroundColor: Color(0xFF000000),
-      fontFamily: "Muli",
-      appBarTheme: appBarTheme(),
-      textTheme: textTheme(),
-      inputDecorationTheme: inputDecorationTheme(),
-      visualDensity: VisualDensity.adaptivePlatformDensity,
-      unselectedWidgetColor: Colors.white);
+    primaryColor: Color(0xFF1E1D1D),
+    scaffoldBackgroundColor: Color(0xFF000000),
+    fontFamily: "Muli",
+    appBarTheme: appBarTheme(),
+    textTheme: textTheme(),
+    inputDecorationTheme: inputDecorationTheme(),
+    visualDensity: VisualDensity.adaptivePlatformDensity,
+    unselectedWidgetColor: Colors.white,
+  );
 }
 
 InputDecorationTheme inputDecorationTheme() {

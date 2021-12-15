@@ -1,7 +1,7 @@
 import 'package:bookario_manager/components/constants.dart';
 import 'package:bookario_manager/components/default_button.dart';
 import 'package:bookario_manager/models/promoter_model.dart';
-import 'package:bookario_manager/screens/club_details/create_event/add_event_viewmodel.dart';
+import 'package:bookario_manager/screens/create_event/add_event_viewmodel.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 

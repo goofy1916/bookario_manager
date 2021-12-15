@@ -1,4 +1,5 @@
 import 'package:bookario_manager/components/constants.dart';
+import 'package:bookario_manager/components/default_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -68,6 +69,29 @@ addPasses(AddEventViewModel viewModel, context) {
         _passType(context, "Male Stag Pass", viewModel),
         _passType(context, "Female Stag Pass", viewModel),
         _passType(context, "Book Table", viewModel),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DefaultButton(
+                text: "Back",
+                press: () {
+                  viewModel.setIndex(viewModel.currentIndex - 1);
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DefaultButton(
+                text: "Next",
+                press: () {
+                  viewModel.setIndex(viewModel.currentIndex + 1);
+                },
+              ),
+            )
+          ],
+        )
       ] else ...[
         Text(
           "${viewModel.selectedPassType}",
@@ -162,19 +186,13 @@ customListTile(
 getCouplePassInput(AddEventViewModel viewModel) {
   return Column(
     children: [
-      customTextFormField(
-          "Pass title",
-          viewModel.couplePasses[viewModel.couplePassIndex][passNameController],
-          "Enter pass name"),
-      customNumberFormField(
-          "Total Cost",
-          viewModel.couplePasses[viewModel.couplePassIndex]
-              [totalCostController],
-          "Enter pass cost"),
+      customTextFormField("Pass title",
+          viewModel.couplePasses.last[passNameController], "Enter pass name"),
+      customNumberFormField("Total Cost",
+          viewModel.couplePasses.last[totalCostController], "Enter pass cost"),
       customNumberFormField(
           "Total Cover",
-          viewModel.couplePasses[viewModel.couplePassIndex]
-              [totalCoverController],
+          viewModel.couplePasses.last[totalCoverController],
           "Enter cover cost"),
     ],
   );
@@ -183,18 +201,12 @@ getCouplePassInput(AddEventViewModel viewModel) {
 getMalePassInput(AddEventViewModel viewModel) {
   return Column(
     children: [
-      customTextFormField(
-          "Pass title",
-          viewModel.malePasses[viewModel.malePassIndex][passNameController],
-          "Enter pass name"),
-      customNumberFormField(
-          "Total Cost",
-          viewModel.malePasses[viewModel.malePassIndex][totalCostController],
-          "Enter pass cost"),
-      customNumberFormField(
-          "Total Cover",
-          viewModel.malePasses[viewModel.malePassIndex][totalCoverController],
-          "Enter cover cost"),
+      customTextFormField("Pass title",
+          viewModel.malePasses.last[passNameController], "Enter pass name"),
+      customNumberFormField("Total Cost",
+          viewModel.malePasses.last[totalCostController], "Enter pass cost"),
+      customNumberFormField("Total Cover",
+          viewModel.malePasses.last[totalCoverController], "Enter cover cost"),
     ],
   );
 }
@@ -202,19 +214,13 @@ getMalePassInput(AddEventViewModel viewModel) {
 getFemalePassInput(AddEventViewModel viewModel) {
   return Column(
     children: [
-      customTextFormField(
-          "Pass title",
-          viewModel.femalePasses[viewModel.femalePassIndex][passNameController],
-          "Enter pass name"),
-      customNumberFormField(
-          "Total Cost",
-          viewModel.femalePasses[viewModel.femalePassIndex]
-              [totalCostController],
-          "Enter pass cost"),
+      customTextFormField("Pass title",
+          viewModel.femalePasses.last[passNameController], "Enter pass name"),
+      customNumberFormField("Total Cost",
+          viewModel.femalePasses.last[totalCostController], "Enter pass cost"),
       customNumberFormField(
           "Total Cover",
-          viewModel.femalePasses[viewModel.femalePassIndex]
-              [totalCoverController],
+          viewModel.femalePasses.last[totalCoverController],
           "Enter cover cost"),
     ],
   );
@@ -223,22 +229,15 @@ getFemalePassInput(AddEventViewModel viewModel) {
 getTablePassInput(AddEventViewModel viewModel) {
   return Column(
     children: [
-      customTextFormField(
-          "Pass title",
-          viewModel.tablePasses[viewModel.tablePassIndex][passNameController],
-          "Enter pass name"),
-      customNumberFormField(
-          "Total Cost",
-          viewModel.tablePasses[viewModel.tablePassIndex][totalCostController],
-          "Enter pass cost"),
-      customNumberFormField(
-          "Total Cover",
-          viewModel.tablePasses[viewModel.tablePassIndex][totalCoverController],
-          "Enter cover cost"),
+      customTextFormField("Pass title",
+          viewModel.tablePasses.last[passNameController], "Enter pass name"),
+      customNumberFormField("Total Cost",
+          viewModel.tablePasses.last[totalCostController], "Enter pass cost"),
+      customNumberFormField("Total Cover",
+          viewModel.tablePasses.last[totalCoverController], "Enter cover cost"),
       customNumberFormField(
           "Total Allowed",
-          viewModel.tablePasses[viewModel.tablePassIndex]
-              [totalAllowedController],
+          viewModel.tablePasses.last[totalAllowedController],
           "Enter total allowed at the table"),
     ],
   );

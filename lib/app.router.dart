@@ -12,7 +12,9 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked/stacked_annotations.dart';
 
 import 'models/club_details.dart';
+import 'models/event_model.dart';
 import 'screens/club_details/club_details_view.dart';
+import 'screens/event_details/create_pass/create_pass_view.dart';
 import 'screens/home/club_home_screen.dart';
 import 'screens/sign_in/sign_in_screen.dart';
 import 'screens/startup/startup_view.dart';
@@ -24,12 +26,14 @@ class Routes {
   static const String userInputDetailsView = '/user_details';
   static const String clubHomeScreen = '/home_screen';
   static const String clubDetailsView = '/club_details';
+  static const String createPassView = '/create_passes';
   static const all = <String>{
     startUpView,
     signInScreen,
     userInputDetailsView,
     clubHomeScreen,
     clubDetailsView,
+    createPassView,
   };
 }
 
@@ -42,6 +46,7 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes.userInputDetailsView, page: UserInputDetailsView),
     RouteDef(Routes.clubHomeScreen, page: ClubHomeScreen),
     RouteDef(Routes.clubDetailsView, page: ClubDetailsView),
+    RouteDef(Routes.createPassView, page: CreatePassView),
   ];
   @override
   Map<Type, StackedRouteFactory> get pagesMap => _pagesMap;
@@ -84,6 +89,16 @@ class StackedRouter extends RouterBase {
         settings: data,
       );
     },
+    CreatePassView: (data) {
+      var args = data.getArgs<CreatePassViewArguments>(nullOk: false);
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => CreatePassView(
+          key: args.key,
+          event: args.event,
+        ),
+        settings: data,
+      );
+    },
   };
 }
 
@@ -103,4 +118,11 @@ class ClubDetailsViewArguments {
   final Key? key;
   final ClubDetails club;
   ClubDetailsViewArguments({this.key, required this.club});
+}
+
+/// CreatePassView arguments holder class
+class CreatePassViewArguments {
+  final Key? key;
+  final EventModel event;
+  CreatePassViewArguments({this.key, required this.event});
 }

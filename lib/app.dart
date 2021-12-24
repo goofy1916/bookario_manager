@@ -1,5 +1,5 @@
 import 'package:bookario_manager/screens/club_details/club_details_view.dart';
-import 'package:bookario_manager/screens/eventDetails/event_details.dart';
+import 'package:bookario_manager/screens/event_details/create_pass/create_pass_view.dart';
 import 'package:bookario_manager/screens/home/club_home_screen.dart';
 import 'package:bookario_manager/screens/sign_in/sign_in_screen.dart';
 import 'package:bookario_manager/screens/startup/startup_view.dart';
@@ -23,6 +23,7 @@ import 'package:stacked_services/stacked_services.dart';
   MaterialRoute(page: ClubDetailsView, path: "/club_details"),
 
   //* Event flow
+  MaterialRoute(page: CreatePassView, path: "/create_passes"),
   // MaterialRoute(page: EventDetailsScreen, path: "/event_details"),
 ], dependencies: [
   LazySingleton(classType: NavigationService),

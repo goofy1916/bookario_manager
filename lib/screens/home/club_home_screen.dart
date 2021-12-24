@@ -62,82 +62,67 @@ class ClubHomeScreen extends StatelessWidget {
         onModelReady: (viewModel) => viewModel.getMyClubs(),
         builder: (context, viewModel, child) {
           return Scaffold(
-              appBar: AppBar(
-                leading: Container(
-                  margin: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: Colors.white,
-                  ),
-                  child: Image.asset(
-                    "assets/images/onlylogo.png",
-                    fit: BoxFit.cover,
-                  ),
+            appBar: AppBar(
+              leading: Container(
+                margin: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: Colors.white,
                 ),
-                title: const Text("Home"),
-                actions: [
-                  IconButton(
-                      onPressed: () => _logout(context, viewModel),
-                      icon: const Icon(Icons.exit_to_app))
-                ],
+                child: Image.asset(
+                  "assets/images/onlylogo.png",
+                  fit: BoxFit.cover,
+                ),
               ),
-              body: viewModel.isBusy
-                  ? const Loading()
-                  : viewModel.hasClubs
-                      ? showClubs(context, viewModel)
-                      : Container(
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Register your club by\nclicking on \'+\' button below.',
-                            textAlign: TextAlign.center,
-                          ),
+              title: const Text("Home"),
+              actions: [
+                IconButton(
+                    onPressed: () => _logout(context, viewModel),
+                    icon: const Icon(Icons.exit_to_app))
+              ],
+            ),
+            body: viewModel.isBusy
+                ? const Loading()
+                : viewModel.hasClubs
+                    ? showClubs(context, viewModel)
+                    : Container(
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Register your club by\nclicking on \'+\' button below.',
+                          textAlign: TextAlign.center,
                         ),
-              floatingActionButton: FloatingActionButton(
-                  elevation: 10,
-                  backgroundColor: kPrimaryLightColor,
-                  onPressed: () async {
-                    // final bool clubAdded = await Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => AddNewClub()),
-                    // );
-                    // if (clubAdded) {
-                    //   getMyClubs();
-                    //   clubAddedAlert(context);
-                    // }
-                  },
-                  child: const Icon(Icons.add, color: kTextColor)));
+                      ),
+          );
         },
         viewModelBuilder: () => HomeScreenViewModel());
   }
 
-  SafeArea showClubs(BuildContext context, HomeScreenViewModel viewModel) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: getProportionateScreenHeight(5)),
-            MyClubs(clubData: viewModel.myClubs!),
-            SizedBox(height: getProportionateScreenWidth(10)),
-            viewModel.loadMore
-                ? viewModel.loadingMore
-                    ? const Loading()
-                    : MaterialButton(
-                        onPressed: () {
-                          // loadingMore = true;
-                          // offset += limit;
+  Widget showClubs(BuildContext context, HomeScreenViewModel viewModel) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(height: getProportionateScreenHeight(5)),
+          MyClubs(clubData: viewModel.myClubs!),
+          SizedBox(height: getProportionateScreenWidth(10)),
+          viewModel.loadMore
+              ? viewModel.loadingMore
+                  ? const Loading()
+                  : MaterialButton(
+                      onPressed: () {
+                        // loadingMore = true;
+                        // offset += limit;
 
-                          // getMyClubs();
-                        },
-                        splashColor: Theme.of(context).primaryColorLight,
-                        child: const Text(
-                          'load more',
-                          style: TextStyle(color: kTextColor),
-                        ),
-                      )
-                : Container(),
-            SizedBox(height: getProportionateScreenWidth(10)),
-          ],
-        ),
+                        // getMyClubs();
+                      },
+                      splashColor: Theme.of(context).primaryColorLight,
+                      child: const Text(
+                        'load more',
+                        style: TextStyle(color: kTextColor),
+                      ),
+                    )
+              : Container(),
+          SizedBox(height: getProportionateScreenWidth(10)),
+        ],
       ),
     );
   }

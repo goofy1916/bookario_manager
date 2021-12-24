@@ -9,6 +9,7 @@ import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fs;
+import 'package:flutter/src/services/text_input.dart';
 
 class FirebaseService {
   final CollectionReference _usersCollectionReference =
@@ -74,7 +75,6 @@ class FirebaseService {
         .where("clubId", isEqualTo: clubId)
         .get();
     for (final doc in response.docs) {
-      log(doc.data().toString());
       events.add(
           EventModel.fromJson(doc.data()! as Map<String, dynamic>, doc.id));
     }
@@ -92,10 +92,11 @@ class FirebaseService {
   }
 
   Future<List<String>> getLocations() async {
-    List<String> locations = [];
+    final List<String> locations = [];
     final response = await _locationsCollectionReference.get();
-    for (final doc in response.docs) {
-      locations.add((doc.data() as Map<String, dynamic>)['location']);
+    final list = response.docs.first.data()! as Map<String, dynamic>;
+    for (final loc in list["location"]) {
+      locations.add(loc.toString());
     }
     return locations;
   }
@@ -111,8 +112,14 @@ class FirebaseService {
     return taskSnapshot.ref.getDownloadURL();
   }
 
-  Future<void> createEvent(Map<String, dynamic> json) async {
+  Future<void> createEvent(
+    Map<String, dynamic> json,
+  ) async {
     await _eventsCollectionReference.doc().set(json);
+  }
+
+  Future<void> updateEvent(Map<String, dynamic> json, String eventId) async {
+    await _eventsCollectionReference.doc(eventId).set(json);
   }
 
   void addCoupon(
@@ -134,5 +141,42 @@ class FirebaseService {
       coupons.add(CouponModel.fromJson(doc.data()));
     }
     return coupons;
+  }
+
+  void removeCoupon({String? eventId}) async {
+    //  await _eventsCollectionReference.doc(eventId).collection('coupons').where(field)
+  }
+
+  removePass(String passType, String type, String eventId) async {
+    await _eventsCollectionReference.doc(eventId).get().then((value) async {
+      List passList = (value.data()! as Map<String, dynamic>)[passType];
+      var selectedPass;
+      for (final pass in passList) {
+        if (pass['type'] == type) {
+          selectedPass = pass;
+        }
+      }
+      passList.remove(selectedPass);
+      await _eventsCollectionReference
+          .doc(eventId)
+          .set({passType: passList}, SetOptions(merge: true));
+    });
+  }
+
+  addPassesToEvent(String eventId, Map<String, dynamic> passes) async {
+    await _eventsCollectionReference.doc(eventId).get().then((value) async {
+      await _eventsCollectionReference
+          .doc(eventId)
+          .set(passes, SetOptions(merge: true));
+    });
+  }
+
+  Future<EventModel> getEvent(String eventId) async {
+    EventModel event;
+    final response = await _eventsCollectionReference.doc(eventId).get();
+    event = EventModel.fromJson(
+        (response.data()! as Map<String, dynamic>), response.id);
+
+    return event;
   }
 }

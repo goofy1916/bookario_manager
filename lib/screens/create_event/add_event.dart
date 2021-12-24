@@ -5,7 +5,6 @@ import 'package:im_stepper/stepper.dart';
 import 'package:stacked/stacked.dart';
 
 import 'add_event_viewmodel.dart';
-import 'add_passes.dart';
 import 'add_promoters.dart';
 import 'basic_event_details.dart';
 
@@ -53,7 +52,7 @@ class AddEvent extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: DotStepper(
                           // direction: Axis.vertical,
-                          dotCount: 3,
+                          dotCount: 2,
                           dotRadius: 6,
 
                           /// THIS MUST BE SET. SEE HOW IT IS CHANGED IN NEXT/PREVIOUS BUTTONS AND JUMP BUTTONS.
@@ -114,7 +113,6 @@ class AddEvent extends StatelessWidget {
 getChild(AddEventViewModel viewModel, BuildContext context) {
   List<Widget> widgets = [
     basicEventDetails(viewModel, context),
-    addPasses(viewModel, context),
     addPromoters(viewModel, context),
   ];
   return widgets[viewModel.currentIndex];

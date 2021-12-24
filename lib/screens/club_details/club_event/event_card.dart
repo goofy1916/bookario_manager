@@ -1,8 +1,7 @@
 import 'package:bookario_manager/components/constants.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/event_model.dart';
-import 'package:bookario_manager/screens/details/details_screen.dart';
-import 'package:bookario_manager/screens/eventDetails/event_details.dart';
+import 'package:bookario_manager/screens/event_details/event_details_screen.dart';
 import 'package:flutter/material.dart';
 
 class EventCard extends StatelessWidget {
@@ -21,7 +20,8 @@ class EventCard extends StatelessWidget {
       child: GestureDetector(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => DetailsScreen(event: event)),
+          MaterialPageRoute(
+              builder: (context) => EventDetailsView(event: event)),
         ),
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),

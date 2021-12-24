@@ -1,15 +1,21 @@
 import 'dart:developer';
 
 import 'package:bookario_manager/app.locator.dart';
+import 'package:bookario_manager/app.router.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
+import 'package:bookario_manager/models/pass_type_model.dart';
 import 'package:bookario_manager/services/firebase_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked_services/stacked_services.dart';
 
-class DetailsScreenViewModel extends BaseViewModel {
+class EventDetailsViewModel extends BaseViewModel {
   FirebaseService firebaseService = locator<FirebaseService>();
+  final NavigationService _navigationService = locator<NavigationService>();
 
+  // *Coupon creation logic
   bool isCouponPercent = false;
 
   final percentOff = TextEditingController();
@@ -18,14 +24,12 @@ class DetailsScreenViewModel extends BaseViewModel {
   final minAmounRequired = TextEditingController();
   final maxDiscountAmount = TextEditingController();
 
-  late final EventModel event;
-
   List<CouponModel> couponsForEvent = [];
 
   bool addNewCoupon = false;
   String couponType = "Percent";
 
-  TextStyle textStyle = const TextStyle(color: Colors.white, fontSize: 14);
+  late EventModel event;
 
   updateIsCouponPercent(bool value) {
     isCouponPercent = value;
@@ -56,7 +60,7 @@ class DetailsScreenViewModel extends BaseViewModel {
     log("Coupon Added: " + couponModel.toJson().toString());
     cancelCoupon();
     setBusyForObject("coupons", true);
-    await getCouponsForEvevnt();
+    await getCouponsForEvent();
     setBusyForObject("coupons", false);
   }
 
@@ -69,15 +73,46 @@ class DetailsScreenViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  getCouponsForEvent() async {
+    couponsForEvent =
+        await firebaseService.getCouponsForEvent(eventId: event.id);
+  }
+
   updateEvent(EventModel currentEvent) async {
     event = currentEvent;
     setBusyForObject("coupons", true);
-    await getCouponsForEvevnt();
+    await getCouponsForEvent();
     setBusyForObject("coupons", false);
   }
 
-  getCouponsForEvevnt() async {
-    couponsForEvent =
-        await firebaseService.getCouponsForEvent(eventId: event.id);
+  removePass(String passType, PassType pass) async {
+    final response = await locator<DialogService>().showConfirmationDialog(
+        title: "Confirm",
+        description: "Are you sure you want to remove this passes?");
+    if (response!.confirmed) {
+      await firebaseService.removePass(passType, pass.type, event.id!);
+      setBusy(true);
+
+      event = await locator<FirebaseService>().getEvent(event.id!);
+
+      setBusy(false);
+      notifyListeners();
+    }
+  }
+
+  goToQrCodeScanner() async {
+    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666', 'Cancel', true, ScanMode.QR);
+    log("QR code : " + barcodeScanRes);
+  }
+
+  void createPasses() async {
+    final result = await _navigationService.navigateTo(Routes.createPassView,
+        arguments: CreatePassViewArguments(event: event));
+    setBusy(true);
+    if (result) {
+      event = await locator<FirebaseService>().getEvent(event.id!);
+    }
+    setBusy(false);
   }
 }

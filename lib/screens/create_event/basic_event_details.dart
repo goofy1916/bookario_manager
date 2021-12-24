@@ -32,8 +32,8 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                               fit: BoxFit.fitHeight,
                             )
                           : Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
+                              decoration: const BoxDecoration(
+                                color: Colors.grey,
                               ),
                               width: SizeConfig.screenWidth * 0.75,
                               height: 150,
@@ -119,10 +119,6 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                         "Couples Count",
                         viewModel.couplesCountTextController,
                         "Total Couples Count"),
-                    customNumberFormField(
-                        "Tables Count",
-                        viewModel.tableCountTextController,
-                        "Total table Count"),
                   ] else
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -152,6 +148,8 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                         ],
                       ),
                     ),
+                  customNumberFormField("Tables Count",
+                      viewModel.tableCountTextController, "Total table Count"),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: DefaultButton(

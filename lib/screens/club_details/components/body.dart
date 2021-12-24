@@ -98,9 +98,6 @@ class Body extends StatelessWidget {
                             builder: (context) => AddEvent(club: club),
                           ),
                         );
-                        // if (eventAdded) {
-                        //   getMyEvents();
-                        // }
                       },
                     ),
                   ),
@@ -123,24 +120,6 @@ class Body extends StatelessWidget {
             viewModel: viewModel,
           ),
           SizedBox(width: getProportionateScreenWidth(10)),
-          // viewModel.loadMore
-          //     ? viewModel.loadingMore
-          //         ? const Loading()
-          //         : MaterialButton(
-          //             onPressed: () {
-          //               // setState(() {
-          //               //   loadingMore = true;
-          //               //   offset += limit;
-          //               // });
-          //               // getMyEvents();
-          //             },
-          //             splashColor: Theme.of(context).primaryColorLight,
-          //             child: const Text(
-          //               'load more',
-          //               style: TextStyle(color: Colors.white54),
-          //             ),
-          //           )
-          //     : Container(),
           SizedBox(height: getProportionateScreenWidth(10)),
         ],
       ),

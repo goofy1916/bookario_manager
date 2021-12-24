@@ -1,6 +1,8 @@
+import 'package:bookario_manager/app.locator.dart';
 import 'package:bookario_manager/components/constants.dart';
 import 'package:bookario_manager/components/loading.dart';
 import 'package:bookario_manager/models/club_details.dart';
+import 'package:bookario_manager/services/firebase_service.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -121,7 +123,7 @@ class _ClubDescriptionState extends State<ClubDescription> {
                   borderRadius: BorderRadius.all(Radius.circular(5)),
                 ),
                 title: Text(
-                  "Enter promoter's email ID:",
+                  "Enter promoter's ID:",
                   style: Theme.of(context)
                       .textTheme
                       .headline6!
@@ -131,29 +133,12 @@ class _ClubDescriptionState extends State<ClubDescription> {
                 actions: <Widget>[
                   MaterialButton(
                     onPressed: () async {
-                      if (promoterEmail.text.isNotEmpty) {
+                      if (promoterId.text.isNotEmpty) {
                         setState(() {
                           addingPromoter = true;
                         });
-                        // final response =
-                        //     await Networking.post('promoters/add-promoter', {
-                        //   'clubId': widget.club['clubId'],
-                        //   'promoterEmail': promoterEmail.text.trim(),
-                        // });
-                        // // if (response['success']) {
-                        // //   setState(() {
-                        // //     addingPromoter = false;
-                        // //   });
-                        // //   Navigator.pop(context);
-                        // //   promoterEmail.clear();
-                        // //   promoterCreated(context, response['data']);
-                        // // } else {
-                        // //   setState(() {
-                        // //     addingPromoter = false;
-                        // //   });
-                        // //   Navigator.pop(context);
-                        // //   promoterError(context, response['message']);
-                        // }
+                        // await locator<FirebaseService>()
+                        //     .addPromoter(promoterId.text);
                       }
                     },
                     splashColor: Colors.red[50],
@@ -177,7 +162,7 @@ class _ClubDescriptionState extends State<ClubDescription> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.grey[900],
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(5)),
           ),
           title: Text(
@@ -213,7 +198,7 @@ class _ClubDescriptionState extends State<ClubDescription> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.grey[900],
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(5)),
           ),
           title: Text(
@@ -272,7 +257,7 @@ class _ClubDescriptionState extends State<ClubDescription> {
     );
   }
 
-  final promoterEmail = TextEditingController();
+  final promoterId = TextEditingController();
 
   TextFormField promoterEmailFormField() {
     return TextFormField(
@@ -280,9 +265,9 @@ class _ClubDescriptionState extends State<ClubDescription> {
       keyboardType: TextInputType.emailAddress,
       cursorColor: Colors.white70,
       textInputAction: TextInputAction.done,
-      controller: promoterEmail,
+      controller: promoterId,
       decoration: const InputDecoration(
-        labelText: "Promoter Email ID",
+        labelText: "Promoter ID",
         floatingLabelBehavior: FloatingLabelBehavior.always,
       ),
     );

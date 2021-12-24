@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:bookario_manager/app.locator.dart';
 import 'package:bookario_manager/models/club_details.dart';
 import 'package:bookario_manager/models/event_model.dart';
-import 'package:bookario_manager/models/pass_type_model.dart';
 import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/services/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,15 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-
-const String couple = "Couple";
-const String male = "Male";
-const String female = "Female";
-const String table = "Table";
-const String passNameController = "passNameController";
-const String totalCostController = "totalCostController";
-const String totalCoverController = "totalCoverController";
-const String totalAllowedController = "totalAllowedController";
 
 class AddEventViewModel extends IndexTrackingViewModel {
   final FirebaseService _firebaseService = locator<FirebaseService>();
@@ -66,38 +56,6 @@ class AddEventViewModel extends IndexTrackingViewModel {
 
   TextEditingController femaleRatioTextController = TextEditingController();
 
-  String? selectedPassType;
-
-  List<Map<String, dynamic>> couplePasses = [
-    {
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController()
-    }
-  ];
-  List<Map<String, dynamic>> malePasses = [
-    {
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController()
-    }
-  ];
-  List<Map<String, dynamic>> femalePasses = [
-    {
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController()
-    }
-  ];
-  List<Map<String, dynamic>> tablePasses = [
-    {
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController(),
-      "totalAllowedController": TextEditingController(),
-    }
-  ];
-
   List<PromoterModel> promoters = [];
   TextEditingController tableCountTextController = TextEditingController();
 
@@ -119,97 +77,6 @@ class AddEventViewModel extends IndexTrackingViewModel {
       coverPhoto = File(image.path);
       notifyListeners();
     }
-  }
-
-  void updateAddPassType(String passType) {
-    if (passType.contains("Couple")) {
-      selectedPassType = couple;
-    } else if (passType.contains("Male")) {
-      selectedPassType = male;
-    } else if (passType.contains("Female")) {
-      selectedPassType = female;
-    } else if (passType.contains("Table")) {
-      selectedPassType = table;
-    }
-    notifyListeners();
-  }
-
-  void clearSelectedPassType() {
-    selectedPassType = null;
-    notifyListeners();
-  }
-
-  void addPass() {
-    final newEntry = <String, dynamic>{
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController()
-    };
-    if (selectedPassType == couple) {
-      couplePasses[couplePasses.length - 1]['passTitle'] = couple +
-          "\n" +
-          couplePasses[couplePasses.length - 1][passNameController].text +
-          ": Cost : " +
-          couplePasses[couplePasses.length - 1][totalCostController].text +
-          ", Cover : " +
-          couplePasses[couplePasses.length - 1][totalCoverController].text;
-
-      couplePasses.add(newEntry);
-    }
-    if (selectedPassType == male) {
-      malePasses[malePasses.length - 1]['passTitle'] = male +
-          " Stag\n" +
-          malePasses[malePasses.length - 1][passNameController].text +
-          ": Cost : " +
-          malePasses[malePasses.length - 1][totalCostController].text +
-          ", Cover : " +
-          malePasses[malePasses.length - 1][totalCoverController].text;
-      malePasses.add(newEntry);
-    }
-    if (selectedPassType == female) {
-      femalePasses[femalePasses.length - 1]['passTitle'] = female +
-          " Stag\n" +
-          femalePasses[femalePasses.length - 1][passNameController].text +
-          ": Cost : " +
-          femalePasses[femalePasses.length - 1][totalCostController].text +
-          ", Cover : " +
-          femalePasses[femalePasses.length - 1][totalCoverController].text;
-      femalePasses.add(newEntry);
-    }
-    if (selectedPassType == table) {
-      tablePasses[tablePasses.length - 1]['passTitle'] = table +
-          "\n" +
-          tablePasses[tablePasses.length - 1][passNameController].text +
-          ": Cost : " +
-          tablePasses[tablePasses.length - 1][totalCostController].text +
-          ", Cover : " +
-          tablePasses[tablePasses.length - 1][totalCoverController].text +
-          ", Allowed : " +
-          tablePasses[tablePasses.length - 1][totalAllowedController].text;
-      tablePasses.add({
-        "passNameController": TextEditingController(),
-        "totalCostController": TextEditingController(),
-        "totalCoverController": TextEditingController(),
-        totalAllowedController: TextEditingController()
-      });
-    }
-    notifyListeners();
-  }
-
-  removePass(String type, String title) {
-    if (type == couple) {
-      couplePasses.removeWhere((element) => element['passTitle'] == title);
-    }
-    if (type == male) {
-      malePasses.removeWhere((element) => element['passTitle'] == title);
-    }
-    if (type == female) {
-      femalePasses.removeWhere((element) => element['passTitle'] == title);
-    }
-    if (type == table) {
-      tablePasses.removeWhere((element) => element['passTitle'] == title);
-    }
-    notifyListeners();
   }
 
   getPromotersAndLocation(ClubDetails currentClub) async {
@@ -234,92 +101,34 @@ class AddEventViewModel extends IndexTrackingViewModel {
     try {
       if (formKey.currentState!.validate()) {
         formKey.currentState!.save();
-        femalePasses.removeWhere((element) {
-          return element[passNameController].text == "";
-        });
-        malePasses
-            .removeWhere((element) => element[passNameController].text == "");
-        couplePasses
-            .removeWhere((element) => element[passNameController].text == "");
-        tablePasses
-            .removeWhere((element) => element[passNameController].text == "");
-
-        List<PassType> femaleEntry = femalePasses
-            .map((pass) => PassType(
-                double.tryParse(
-                        (pass[totalCoverController] as TextEditingController)
-                            .text) ??
-                    0,
-                double.parse(
-                    (pass[totalCostController] as TextEditingController).text),
-                pass[passNameController].text,
-                null))
-            .toList();
-
-        List<PassType> maleEntry = malePasses
-            .map((pass) => PassType(
-                double.tryParse(
-                        (pass[totalCoverController] as TextEditingController)
-                            .text) ??
-                    0,
-                double.parse(
-                    (pass[totalCostController] as TextEditingController).text),
-                pass[passNameController].text,
-                null))
-            .toList();
-
-        List<PassType> coupleEntry = couplePasses
-            .map((pass) => PassType(
-                double.tryParse(
-                        (pass[totalCoverController] as TextEditingController)
-                            .text) ??
-                    0,
-                double.parse(
-                    (pass[totalCostController] as TextEditingController).text),
-                pass[passNameController].text,
-                null))
-            .toList();
-
-        List<PassType> tableEntry = tablePasses
-            .map((pass) => PassType(
-                double.tryParse(
-                        (pass[totalCoverController] as TextEditingController)
-                            .text) ??
-                    0,
-                double.parse(
-                    (pass[totalCostController] as TextEditingController).text),
-                pass[passNameController].text,
-                int.parse(
-                    (pass[totalAllowedController] as TextEditingController)
-                        .text)))
-            .toList();
 
         String thumbnailURL = await _firebaseService.uploadImageToFirebase(
             coverPhoto!, eventNameTextController.text);
 
         EventModel event = EventModel(
-            clubId: club.id,
-            dateTime: Timestamp.fromDate(
-                DateTime.tryParse(dateTimeTextController.text)!),
-            desc: eventDescriptionTextController.text,
-            maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
-            name: eventNameTextController.text,
-            femaleRatio: int.tryParse(femaleRatioTextController.text) ?? 1,
-            maleRatio: int.tryParse(maleRatioTextController.text) ?? 1,
-            eventThumbnail: thumbnailURL,
-            location: location!,
-            stagFemaleEntry: femaleEntry,
-            stagMaleEntry: maleEntry,
-            coupleEntry: coupleEntry,
-            tableOption: tableEntry,
-            bookedPasses: <String>[],
-            remainingPasses:
-                int.tryParse(totalCapacityTextController.text) ?? 0,
-            maxTables: int.tryParse(tableCountTextController.text) ?? 0,
-            totalMale: int.tryParse(maleCountTextController.text) ?? 0,
-            totalFemale: int.tryParse(femaleCountTextController.text) ?? 0,
-            totalTable: int.tryParse(tableCountTextController.text) ?? 0,
-            promoters: selectedPromoters.map((e) => e.promoterId).toList());
+          clubId: club.id,
+          dateTime: Timestamp.fromDate(
+              DateTime.tryParse(dateTimeTextController.text)!),
+          desc: eventDescriptionTextController.text,
+          maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
+          name: eventNameTextController.text,
+          femaleRatio:
+              showRatio ? int.parse(femaleRatioTextController.text) : 0,
+          maleRatio: showRatio ? int.parse(maleRatioTextController.text) : 0,
+          eventThumbnail: thumbnailURL,
+          location: location!,
+          stagFemaleEntry: [],
+          stagMaleEntry: [],
+          coupleEntry: [],
+          tableOption: [],
+          bookedPasses: <String>[],
+          remainingPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
+          maxTables: !showRatio ? int.parse(tableCountTextController.text) : 0,
+          totalMale: !showRatio ? int.parse(maleCountTextController.text) : 0,
+          totalFemale:
+              !showRatio ? int.parse(femaleCountTextController.text) : 0,
+          totalTable: !showRatio ? int.parse(tableCountTextController.text) : 0,
+        );
 
         log("Created Event: " + event.toJson().toString());
         await _firebaseService.createEvent(event.toJson());

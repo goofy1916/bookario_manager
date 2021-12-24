@@ -3,7 +3,7 @@ import 'package:bookario_manager/components/default_button.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
-import 'package:bookario_manager/screens/details/details_screen_viewmodel.dart';
+import 'package:bookario_manager/screens/event_details/event_details_screen_viewmodel.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,7 +19,7 @@ class EventDescription extends StatelessWidget {
   }) : super(key: key);
 
   final EventModel event;
-  final DetailsScreenViewModel viewModel;
+  final EventDetailsViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +94,21 @@ class EventDescription extends StatelessWidget {
             ),
           ),
         ),
-        AllPrices(event: event),
+        AllPrices(
+          event: event,
+          viewModel: viewModel,
+        ),
+        const SizedBox(height: 20),
+        MaterialButton(
+          color: Colors.grey[800],
+          onPressed: () {
+            viewModel.createPasses();
+          },
+          child: const Text(
+            "Add Passes",
+            style: TextStyle(color: Colors.white70),
+          ),
+        ),
         const SizedBox(height: 20),
         const Divider(
           color: Colors.white,
@@ -184,7 +198,7 @@ class CouponForm extends StatelessWidget {
     required this.viewModel,
   }) : super(key: key);
 
-  final DetailsScreenViewModel viewModel;
+  final EventDetailsViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -193,8 +207,8 @@ class CouponForm extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Type : ",
-                style: viewModel.textStyle.copyWith(color: kSecondaryColor)),
+            const Text("Type : ",
+                style: TextStyle(color: kSecondaryColor, fontSize: 14)),
             DropdownButton<String>(
               dropdownColor: Colors.grey,
               items: const [

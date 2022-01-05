@@ -31,6 +31,11 @@ class EventDetailsViewModel extends BaseViewModel {
 
   late EventModel event;
 
+  TextEditingController maleCountController = TextEditingController(text: "0");
+
+  TextEditingController femaleCountController =
+      TextEditingController(text: "0");
+
   updateIsCouponPercent(bool value) {
     isCouponPercent = value;
     notifyListeners();
@@ -100,19 +105,63 @@ class EventDetailsViewModel extends BaseViewModel {
     }
   }
 
-  goToQrCodeScanner() async {
+  goToQrCodeScanner(EventDetailsViewModel viewModel) async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', 'Cancel', true, ScanMode.QR);
     log("QR code : " + barcodeScanRes);
+    if (barcodeScanRes.isNotEmpty) {
+      viewModel.checkScannedPass(barcodeScanRes);
+    }
   }
 
   void createPasses() async {
     final result = await _navigationService.navigateTo(Routes.createPassView,
         arguments: CreatePassViewArguments(event: event));
     setBusy(true);
-    if (result) {
+    if (result != null && result) {
       event = await locator<FirebaseService>().getEvent(event.id!);
     }
     setBusy(false);
+  }
+
+  void checkScannedPass(String barcodeScanRes) {
+    _navigationService.navigateTo(Routes.showScannedPass,
+        arguments: ShowScannedPassArguments(
+            passId: barcodeScanRes, eventId: event.id!));
+  }
+
+  checkAllPasses() {
+    _navigationService.navigateTo(Routes.bookingHistory,
+        arguments: BookingHistoryArguments(eventId: event.id!));
+  }
+
+  Future<void> balanceCrowd() async {
+    try {
+      int maleCount = int.parse(maleCountController.text) + event.totalMale;
+      int femaleCount =
+          int.parse(femaleCountController.text) + event.totalFemale;
+      await firebaseService.updateCrowd(event.id!, maleCount, femaleCount);
+      _navigationService.back();
+
+      notifyListeners();
+    } catch (e) {
+      await locator<DialogService>()
+          .showDialog(title: "Invalid Values", description: "$e");
+    }
+  }
+
+  refreshEvent() async {
+    event = await firebaseService.getEvent(event.id!);
+    notifyListeners();
+  }
+
+  removeCoupon(CouponModel coupon) async {
+    final response = await locator<DialogService>().showConfirmationDialog(
+        title: "Caution",
+        description: "Are you sure you want delete this coupond?");
+    if (response?.confirmed ?? false) {
+      await firebaseService.removeCoupon(coupon, event.id!);
+      refreshEvent();
+    }
   }
 }

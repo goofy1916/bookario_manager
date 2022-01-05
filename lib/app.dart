@@ -1,6 +1,8 @@
 import 'package:bookario_manager/screens/club_details/club_details_view.dart';
-import 'package:bookario_manager/screens/event_details/create_pass/create_pass_view.dart';
+import 'package:bookario_manager/screens/create_pass/create_pass_view.dart';
+import 'package:bookario_manager/screens/history/booking_history.dart';
 import 'package:bookario_manager/screens/home/club_home_screen.dart';
+import 'package:bookario_manager/screens/show_scanned_pass/show_scanned_pass.dart';
 import 'package:bookario_manager/screens/sign_in/sign_in_screen.dart';
 import 'package:bookario_manager/screens/startup/startup_view.dart';
 import 'package:bookario_manager/screens/user_input_details/user_input_details_view.dart';
@@ -24,6 +26,8 @@ import 'package:stacked_services/stacked_services.dart';
 
   //* Event flow
   MaterialRoute(page: CreatePassView, path: "/create_passes"),
+  MaterialRoute(page: ShowScannedPass, path: "/check_pass"),
+  MaterialRoute(page: BookingHistory, path: "/booking_history"),
   // MaterialRoute(page: EventDetailsScreen, path: "/event_details"),
 ], dependencies: [
   LazySingleton(classType: NavigationService),

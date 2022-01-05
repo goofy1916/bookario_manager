@@ -1,4 +1,6 @@
 import 'package:bookario_manager/components/constants.dart';
+import 'package:bookario_manager/components/custom_number_field.dart';
+import 'package:bookario_manager/components/custom_text_form_field.dart';
 import 'package:bookario_manager/components/default_button.dart';
 import 'package:bookario_manager/components/loading.dart';
 import 'package:bookario_manager/components/size_config.dart';
@@ -42,12 +44,14 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                             ),
                     ),
                   ),
-                  customTextFormField("Event Name",
-                      viewModel.eventNameTextController, "Enter event name"),
-                  customTextFormField(
-                      "Description",
-                      viewModel.eventDescriptionTextController,
-                      "Enter short description for the event"),
+                  CustomTextFormField(
+                      fieldTitle: "Event Name",
+                      fieldController: viewModel.eventNameTextController,
+                      fieldHint: "Enter event name"),
+                  CustomTextFormField(
+                      fieldTitle: "Description",
+                      fieldController: viewModel.eventDescriptionTextController,
+                      fieldHint: "Enter short description for the event"),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: DateTimePicker(
@@ -71,10 +75,10 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                     ),
                   ),
                   buildLocationSelectionDropDown(viewModel, context),
-                  customNumberFormField(
-                      "Total Capacity",
-                      viewModel.totalCapacityTextController,
-                      "Enter total capacity for the event"),
+                  CustomNumberFormField(
+                      fieldTitle: "Total Capacity",
+                      fieldController: viewModel.totalCapacityTextController,
+                      fieldHint: "Enter total capacity for the event"),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
@@ -109,16 +113,19 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                     ),
                   ),
                   if (!viewModel.showRatio) ...[
-                    customNumberFormField("Male Count",
-                        viewModel.maleCountTextController, "Total Male Count"),
-                    customNumberFormField(
-                        "Female Count",
-                        viewModel.femaleCountTextController,
-                        "Total Female Count"),
-                    customNumberFormField(
-                        "Couples Count",
-                        viewModel.couplesCountTextController,
-                        "Total Couples Count"),
+                    CustomNumberFormField(
+                      fieldTitle: "Male Count",
+                      fieldController: viewModel.maleCountTextController,
+                      fieldHint: "Total Male Count",
+                    ),
+                    CustomNumberFormField(
+                        fieldTitle: "Female Count",
+                        fieldController: viewModel.femaleCountTextController,
+                        fieldHint: "Total Female Count"),
+                    CustomNumberFormField(
+                        fieldTitle: "Couples Count",
+                        fieldController: viewModel.couplesCountTextController,
+                        fieldHint: "Total Couples Count"),
                   ] else
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -132,8 +139,11 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 8.0, horizontal: 3),
-                              child: customNumberFormField("Male Ratio",
-                                  viewModel.maleRatioTextController, "eg. 3"),
+                              child: CustomNumberFormField(
+                                  fieldTitle: "Male Ratio",
+                                  fieldController:
+                                      viewModel.maleRatioTextController,
+                                  fieldHint: "eg. 3"),
                             ),
                           ),
                           const Text(' : '),
@@ -141,15 +151,20 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 8.0, horizontal: 3),
-                              child: customNumberFormField("Female Ratio",
-                                  viewModel.femaleRatioTextController, "eg. 2"),
+                              child: CustomNumberFormField(
+                                  fieldTitle: "Female Ratio",
+                                  fieldController:
+                                      viewModel.femaleRatioTextController,
+                                  fieldHint: "eg. 2"),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  customNumberFormField("Tables Count",
-                      viewModel.tableCountTextController, "Total table Count"),
+                  CustomNumberFormField(
+                      fieldTitle: "Tables Count",
+                      fieldController: viewModel.tableCountTextController,
+                      fieldHint: "Total table Count"),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: DefaultButton(

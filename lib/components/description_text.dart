@@ -1,7 +1,6 @@
 import 'package:bookario_manager/components/constants.dart';
+import 'package:bookario_manager/components/size_config.dart';
 import 'package:flutter/material.dart';
-
-import '../../../../components/size_config.dart';
 
 class DescriptionTextWidget extends StatefulWidget {
   final String text;

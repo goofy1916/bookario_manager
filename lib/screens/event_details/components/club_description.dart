@@ -1,5 +1,6 @@
 import 'package:bookario_manager/components/constants.dart';
 import 'package:bookario_manager/components/default_button.dart';
+import 'package:bookario_manager/components/description_text.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'all_prices.dart';
-import 'description_text.dart';
 
 class EventDescription extends StatelessWidget {
   const EventDescription({
@@ -81,6 +81,27 @@ class EventDescription extends StatelessWidget {
           ),
         ),
         DescriptionTextWidget(text: event.desc),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 25,
+          ),
+          child: Text(
+            "Booked Passes: ${viewModel.event.bookedPasses?.length}",
+            style: const TextStyle(
+              fontSize: 18,
+              color: Colors.white70,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Text(
+          "Total male: ${viewModel.event.totalMale}\nTotal female: ${viewModel.event.totalFemale}\nTotal tables: ${viewModel.event.totalTable}",
+          style: const TextStyle(
+            fontSize: 18,
+            color: Colors.white70,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const Padding(
           padding: EdgeInsets.only(
             top: 25,
@@ -126,16 +147,14 @@ class EventDescription extends StatelessWidget {
                   Column(
                     children: viewModel.couponsForEvent
                         .map(
-                          (coupon) => ListTile(
-                            title: Card(
-                              color: kSecondaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: getCouponDetails(coupon),
-                              ),
+                          (coupon) => Card(
+                            color: kSecondaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: getCouponDetails(coupon),
                             ),
                           ),
                         )
@@ -170,23 +189,31 @@ class EventDescription extends StatelessWidget {
   }
 
   getCouponDetails(CouponModel coupon) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (coupon.percentOff != null) ...[
-          whiteTextField18("Coupon type: Percent"),
-          whiteTextField(
-              "Percent off: ${coupon.percentOff}%, Max discount: Rs.${coupon.maxAmount},"),
-          whiteTextField(
-              "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
-          whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
-        ] else ...[
-          whiteTextField18("Coupon type: Flat off"),
-          whiteTextField("Max discount: Rs.${coupon.maxAmount},"),
-          whiteTextField(
-              "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
-          whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
-        ]
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (coupon.percentOff != null) ...[
+              whiteTextField18("Coupon type: Percent"),
+              whiteTextField(
+                  "Percent off: ${coupon.percentOff}%, Max discount: Rs.${coupon.maxAmount},"),
+              whiteTextField(
+                  "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
+              whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
+            ] else ...[
+              whiteTextField18("Coupon type: Flat off"),
+              whiteTextField("Max discount: Rs.${coupon.maxAmount},"),
+              whiteTextField(
+                  "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
+              whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
+            ]
+          ],
+        ),
+        InkWell(
+            onTap: () => viewModel.removeCoupon(coupon),
+            child: const Icon(Icons.remove_circle, color: kPrimaryLightColor)),
       ],
     );
   }

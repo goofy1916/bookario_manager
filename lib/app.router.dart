@@ -14,8 +14,10 @@ import 'package:stacked/stacked_annotations.dart';
 import 'models/club_details.dart';
 import 'models/event_model.dart';
 import 'screens/club_details/club_details_view.dart';
-import 'screens/event_details/create_pass/create_pass_view.dart';
+import 'screens/create_pass/create_pass_view.dart';
+import 'screens/history/booking_history.dart';
 import 'screens/home/club_home_screen.dart';
+import 'screens/show_scanned_pass/show_scanned_pass.dart';
 import 'screens/sign_in/sign_in_screen.dart';
 import 'screens/startup/startup_view.dart';
 import 'screens/user_input_details/user_input_details_view.dart';
@@ -27,6 +29,8 @@ class Routes {
   static const String clubHomeScreen = '/home_screen';
   static const String clubDetailsView = '/club_details';
   static const String createPassView = '/create_passes';
+  static const String showScannedPass = '/check_pass';
+  static const String bookingHistory = '/booking_history';
   static const all = <String>{
     startUpView,
     signInScreen,
@@ -34,6 +38,8 @@ class Routes {
     clubHomeScreen,
     clubDetailsView,
     createPassView,
+    showScannedPass,
+    bookingHistory,
   };
 }
 
@@ -47,6 +53,8 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes.clubHomeScreen, page: ClubHomeScreen),
     RouteDef(Routes.clubDetailsView, page: ClubDetailsView),
     RouteDef(Routes.createPassView, page: CreatePassView),
+    RouteDef(Routes.showScannedPass, page: ShowScannedPass),
+    RouteDef(Routes.bookingHistory, page: BookingHistory),
   ];
   @override
   Map<Type, StackedRouteFactory> get pagesMap => _pagesMap;
@@ -59,7 +67,7 @@ class StackedRouter extends RouterBase {
     },
     SignInScreen: (data) {
       return MaterialPageRoute<dynamic>(
-        builder: (context) => SignInScreen(),
+        builder: (context) => const SignInScreen(),
         settings: data,
       );
     },
@@ -99,6 +107,27 @@ class StackedRouter extends RouterBase {
         settings: data,
       );
     },
+    ShowScannedPass: (data) {
+      var args = data.getArgs<ShowScannedPassArguments>(nullOk: false);
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => ShowScannedPass(
+          key: args.key,
+          passId: args.passId,
+          eventId: args.eventId,
+        ),
+        settings: data,
+      );
+    },
+    BookingHistory: (data) {
+      var args = data.getArgs<BookingHistoryArguments>(nullOk: false);
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => BookingHistory(
+          key: args.key,
+          eventId: args.eventId,
+        ),
+        settings: data,
+      );
+    },
   };
 }
 
@@ -125,4 +154,20 @@ class CreatePassViewArguments {
   final Key? key;
   final EventModel event;
   CreatePassViewArguments({this.key, required this.event});
+}
+
+/// ShowScannedPass arguments holder class
+class ShowScannedPassArguments {
+  final Key? key;
+  final String passId;
+  final String eventId;
+  ShowScannedPassArguments(
+      {this.key, required this.passId, required this.eventId});
+}
+
+/// BookingHistory arguments holder class
+class BookingHistoryArguments {
+  final Key? key;
+  final String eventId;
+  BookingHistoryArguments({this.key, required this.eventId});
 }

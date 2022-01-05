@@ -1,15 +1,14 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:bookario_manager/models/club_details.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
+import 'package:bookario_manager/models/event_pass_model.dart';
 import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fs;
-import 'package:flutter/src/services/text_input.dart';
 
 class FirebaseService {
   final CollectionReference _usersCollectionReference =
@@ -22,6 +21,8 @@ class FirebaseService {
       FirebaseFirestore.instance.collection('promoters');
   final CollectionReference _locationsCollectionReference =
       FirebaseFirestore.instance.collection('locations');
+  final CollectionReference _passesCollectionReference =
+      FirebaseFirestore.instance.collection('passes');
 
   Future updateUser(
     UserModel user,
@@ -138,13 +139,17 @@ class FirebaseService {
         .collection("coupons")
         .get();
     for (final doc in response.docs) {
-      coupons.add(CouponModel.fromJson(doc.data()));
+      coupons.add(CouponModel.fromJson(doc.data(), doc.id));
     }
     return coupons;
   }
 
-  void removeCoupon({String? eventId}) async {
-    //  await _eventsCollectionReference.doc(eventId).collection('coupons').where(field)
+  Future removeCoupon(CouponModel coupon, String eventId) async {
+    await _eventsCollectionReference
+        .doc(eventId)
+        .collection('coupons')
+        .doc(coupon.id)
+        .delete();
   }
 
   removePass(String passType, String type, String eventId) async {
@@ -178,5 +183,53 @@ class FirebaseService {
         (response.data()! as Map<String, dynamic>), response.id);
 
     return event;
+  }
+
+  Future<EventPass?> getPass(String passId) async {
+    EventPass eventPass;
+    try {
+      final response = await _passesCollectionReference.doc(passId).get();
+      log(response.data().toString());
+      if (response.exists) {
+        eventPass =
+            EventPass.fromJson(response.data() as Map<String, dynamic>, passId);
+        return eventPass;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      log("Get passes: $e");
+      return null;
+    }
+  }
+
+  Future<List<EventPass>> getPasses(String eventId) async {
+    final List<EventPass> eventPasses = [];
+    try {
+      final response = await _passesCollectionReference
+          .where("eventId", isEqualTo: eventId)
+          .get();
+      for (final data in response.docs) {
+        final EventPass pass =
+            EventPass.fromJson(data.data()! as Map<String, dynamic>, data.id);
+        eventPasses.add(pass);
+      }
+      return eventPasses;
+    } catch (e) {
+      log("Get passes: $e");
+      return [];
+    }
+  }
+
+  approvePass(String passId) {
+    _passesCollectionReference
+        .doc(passId)
+        .set({"checked": true}, SetOptions(merge: true));
+  }
+
+  updateCrowd(String eventId, int maleCount, int femaleCount) async {
+    _eventsCollectionReference.doc(eventId).set(
+        {"totalMale": maleCount, "totalFemale": femaleCount},
+        SetOptions(merge: true));
   }
 }

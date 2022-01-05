@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../components/size_config.dart';
-import 'description_text.dart';
+import '../../../components/description_text.dart';
 
 class ClubDescription extends StatefulWidget {
   const ClubDescription({

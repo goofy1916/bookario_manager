@@ -1,4 +1,5 @@
 import 'package:bookario_manager/components/constants.dart';
+import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/event_model.dart';
 import 'package:bookario_manager/screens/event_details/event_details_screen.dart';
@@ -21,7 +22,10 @@ class EventCard extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => EventDetailsView(event: event)),
+              builder: (context) => EventDetailsView(
+                    event: event,
+                    eventDisplayType: EventDisplayType.edit,
+                  )),
         ),
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),

@@ -5,6 +5,7 @@ import 'package:bookario_manager/app.router.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
 import 'package:bookario_manager/models/pass_type_model.dart';
+import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/services/firebase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -12,7 +13,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 class EventDetailsViewModel extends BaseViewModel {
-  FirebaseService firebaseService = locator<FirebaseService>();
+  final FirebaseService _firebaseService = locator<FirebaseService>();
   final NavigationService _navigationService = locator<NavigationService>();
 
   // *Coupon creation logic
@@ -61,7 +62,8 @@ class EventDetailsViewModel extends BaseViewModel {
         maxCoupons: int.parse(maxCoupons.text.toString()),
         remainingCoupons: int.parse(maxCoupons.text.toString()));
 
-    firebaseService.addCoupon(eventId: event.id!, coupon: couponModel.toJson());
+    _firebaseService.addCoupon(
+        eventId: event.id!, coupon: couponModel.toJson());
     log("Coupon Added: " + couponModel.toJson().toString());
     cancelCoupon();
     setBusyForObject("coupons", true);
@@ -80,10 +82,10 @@ class EventDetailsViewModel extends BaseViewModel {
 
   getCouponsForEvent() async {
     couponsForEvent =
-        await firebaseService.getCouponsForEvent(eventId: event.id);
+        await _firebaseService.getCouponsForEvent(eventId: event.id);
   }
 
-  updateEvent(EventModel currentEvent) async {
+  updateCoupons(EventModel currentEvent) async {
     event = currentEvent;
     setBusyForObject("coupons", true);
     await getCouponsForEvent();
@@ -95,7 +97,7 @@ class EventDetailsViewModel extends BaseViewModel {
         title: "Confirm",
         description: "Are you sure you want to remove this passes?");
     if (response!.confirmed) {
-      await firebaseService.removePass(passType, pass.type, event.id!);
+      await _firebaseService.removePass(passType, pass.type, event.id!);
       setBusy(true);
 
       event = await locator<FirebaseService>().getEvent(event.id!);
@@ -114,6 +116,11 @@ class EventDetailsViewModel extends BaseViewModel {
     }
   }
 
+  updateEvent() async {
+    await _firebaseService.updateEvent(event.toJson(), event.id!);
+    refreshEvent();
+  }
+
   void createPasses() async {
     final result = await _navigationService.navigateTo(Routes.createPassView,
         arguments: CreatePassViewArguments(event: event));
@@ -122,6 +129,17 @@ class EventDetailsViewModel extends BaseViewModel {
       event = await locator<FirebaseService>().getEvent(event.id!);
     }
     setBusy(false);
+  }
+
+  getPromoters() async {
+    List<String> promoters = [];
+    event.promoters?.forEach((element) {
+      promoters.add(element.toString());
+    });
+    await _navigationService.navigateTo(Routes.addPromoters,
+        arguments:
+            AddPromotersArguments(eventId: event.id!, promoters: promoters));
+    refreshEvent();
   }
 
   void checkScannedPass(String barcodeScanRes) {
@@ -140,7 +158,7 @@ class EventDetailsViewModel extends BaseViewModel {
       int maleCount = int.parse(maleCountController.text) + event.totalMale;
       int femaleCount =
           int.parse(femaleCountController.text) + event.totalFemale;
-      await firebaseService.updateCrowd(event.id!, maleCount, femaleCount);
+      await _firebaseService.updateCrowd(event.id!, maleCount, femaleCount);
       _navigationService.back();
 
       notifyListeners();
@@ -151,17 +169,28 @@ class EventDetailsViewModel extends BaseViewModel {
   }
 
   refreshEvent() async {
-    event = await firebaseService.getEvent(event.id!);
+    event = await _firebaseService.getEvent(event.id!);
     notifyListeners();
   }
 
   removeCoupon(CouponModel coupon) async {
     final response = await locator<DialogService>().showConfirmationDialog(
         title: "Caution",
-        description: "Are you sure you want delete this coupond?");
+        description: "Are you sure you want delete this coupon?");
     if (response?.confirmed ?? false) {
-      await firebaseService.removeCoupon(coupon, event.id!);
+      await _firebaseService.removeCoupon(coupon, event.id!);
       refreshEvent();
+    }
+  }
+
+  handleBack(bool confirm) async {
+    if (confirm) {
+      final response = await locator<DialogService>().showConfirmationDialog(
+          title: "Caution",
+          description: "Are you sure you want create this event?");
+      if (response?.confirmed ?? false) {
+        _navigationService.back(result: true);
+      }
     }
   }
 }

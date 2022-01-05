@@ -1,4 +1,5 @@
 import 'package:bookario_manager/app.locator.dart';
+import 'package:bookario_manager/app.router.dart';
 import 'package:bookario_manager/services/authentication_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,7 @@ class SignInViewModel extends BaseViewModel {
       password: password,
     );
     if (result is User) {
-      // _navigationService.clearStackAndShow(Routes.landingView);
+      _navigationService.clearStackAndShow(Routes.clubHomeScreen);
     }
     setBusy(false);
   }

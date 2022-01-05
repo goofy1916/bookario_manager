@@ -11,10 +11,13 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked/stacked_annotations.dart';
 
+import 'components/enum.dart';
 import 'models/club_details.dart';
 import 'models/event_model.dart';
+import 'screens/add_promoter/add_promoter.dart';
 import 'screens/club_details/club_details_view.dart';
 import 'screens/create_pass/create_pass_view.dart';
+import 'screens/event_details/event_details_screen.dart';
 import 'screens/history/booking_history.dart';
 import 'screens/home/club_home_screen.dart';
 import 'screens/show_scanned_pass/show_scanned_pass.dart';
@@ -28,18 +31,22 @@ class Routes {
   static const String userInputDetailsView = '/user_details';
   static const String clubHomeScreen = '/home_screen';
   static const String clubDetailsView = '/club_details';
+  static const String eventDetailsView = '/event_details';
   static const String createPassView = '/create_passes';
   static const String showScannedPass = '/check_pass';
   static const String bookingHistory = '/booking_history';
+  static const String addPromoters = '/add_promoters';
   static const all = <String>{
     startUpView,
     signInScreen,
     userInputDetailsView,
     clubHomeScreen,
     clubDetailsView,
+    eventDetailsView,
     createPassView,
     showScannedPass,
     bookingHistory,
+    addPromoters,
   };
 }
 
@@ -52,9 +59,11 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes.userInputDetailsView, page: UserInputDetailsView),
     RouteDef(Routes.clubHomeScreen, page: ClubHomeScreen),
     RouteDef(Routes.clubDetailsView, page: ClubDetailsView),
+    RouteDef(Routes.eventDetailsView, page: EventDetailsView),
     RouteDef(Routes.createPassView, page: CreatePassView),
     RouteDef(Routes.showScannedPass, page: ShowScannedPass),
     RouteDef(Routes.bookingHistory, page: BookingHistory),
+    RouteDef(Routes.addPromoters, page: AddPromoters),
   ];
   @override
   Map<Type, StackedRouteFactory> get pagesMap => _pagesMap;
@@ -97,6 +106,17 @@ class StackedRouter extends RouterBase {
         settings: data,
       );
     },
+    EventDetailsView: (data) {
+      var args = data.getArgs<EventDetailsViewArguments>(nullOk: false);
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => EventDetailsView(
+          key: args.key,
+          event: args.event,
+          eventDisplayType: args.eventDisplayType,
+        ),
+        settings: data,
+      );
+    },
     CreatePassView: (data) {
       var args = data.getArgs<CreatePassViewArguments>(nullOk: false);
       return MaterialPageRoute<dynamic>(
@@ -128,6 +148,17 @@ class StackedRouter extends RouterBase {
         settings: data,
       );
     },
+    AddPromoters: (data) {
+      var args = data.getArgs<AddPromotersArguments>(nullOk: false);
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => AddPromoters(
+          key: args.key,
+          eventId: args.eventId,
+          promoters: args.promoters,
+        ),
+        settings: data,
+      );
+    },
   };
 }
 
@@ -147,6 +178,15 @@ class ClubDetailsViewArguments {
   final Key? key;
   final ClubDetails club;
   ClubDetailsViewArguments({this.key, required this.club});
+}
+
+/// EventDetailsView arguments holder class
+class EventDetailsViewArguments {
+  final Key? key;
+  final EventModel event;
+  final EventDisplayType eventDisplayType;
+  EventDetailsViewArguments(
+      {this.key, required this.event, required this.eventDisplayType});
 }
 
 /// CreatePassView arguments holder class
@@ -170,4 +210,13 @@ class BookingHistoryArguments {
   final Key? key;
   final String eventId;
   BookingHistoryArguments({this.key, required this.eventId});
+}
+
+/// AddPromoters arguments holder class
+class AddPromotersArguments {
+  final Key? key;
+  final String eventId;
+  final List<String> promoters;
+  AddPromotersArguments(
+      {this.key, required this.eventId, required this.promoters});
 }

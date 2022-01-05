@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class HoveringBackButton extends StatelessWidget {
   const HoveringBackButton({
     Key? key,
+    this.back,
   }) : super(key: key);
 
+  final Function()? back;
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topLeft,
       child: GestureDetector(
-        onTap: () => Navigator.pop(context),
+        onTap: () => back ?? Navigator.pop(context),
         child: Container(
           margin: const EdgeInsets.only(left: 12, top: 16),
           height: 35,

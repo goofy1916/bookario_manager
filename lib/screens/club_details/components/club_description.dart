@@ -1,8 +1,6 @@
-import 'package:bookario_manager/app.locator.dart';
 import 'package:bookario_manager/components/constants.dart';
 import 'package:bookario_manager/components/loading.dart';
 import 'package:bookario_manager/models/club_details.dart';
-import 'package:bookario_manager/services/firebase_service.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';

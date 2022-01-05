@@ -203,7 +203,7 @@ class FirebaseService {
     }
   }
 
-  Future<List<EventPass>> getPasses(String eventId) async {
+  Future<List<EventPass>> getAllPasses(String eventId) async {
     final List<EventPass> eventPasses = [];
     try {
       final response = await _passesCollectionReference
@@ -231,5 +231,11 @@ class FirebaseService {
     _eventsCollectionReference.doc(eventId).set(
         {"totalMale": maleCount, "totalFemale": femaleCount},
         SetOptions(merge: true));
+  }
+
+  addPromoters(String eventid, List<String> promoterList) async {
+    await _eventsCollectionReference
+        .doc(eventid)
+        .set({"promoters": promoterList}, SetOptions(merge: true));
   }
 }

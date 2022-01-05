@@ -22,7 +22,7 @@ class BookingHistoryViewModel extends BaseViewModel {
 
   Future getBookingData(String eventId) async {
     setBusy(true);
-    eventPasses = await _firebaseService.getPasses(eventId);
+    eventPasses = await _firebaseService.getAllPasses(eventId);
     for (final i in eventPasses) {
       if (i.checked) {
         checkedInPasses.add(i);

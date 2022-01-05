@@ -13,7 +13,9 @@ class ClubDetailsViewModel extends BaseViewModel {
 
   List<EventModel> myEvents = [];
 
-  getMyEvents(ClubDetails club) async {
+  getMyEvents(
+    ClubDetails club,
+  ) async {
     try {
       myEvents = await _firebaseService.getMyEvents(club.id);
       if (myEvents.isNotEmpty) {

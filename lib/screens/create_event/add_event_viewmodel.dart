@@ -2,6 +2,8 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:bookario_manager/app.locator.dart';
+import 'package:bookario_manager/app.router.dart';
+import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/models/club_details.dart';
 import 'package:bookario_manager/models/event_model.dart';
 import 'package:bookario_manager/models/promoter_model.dart';
@@ -14,6 +16,7 @@ import 'package:stacked_services/stacked_services.dart';
 
 class AddEventViewModel extends IndexTrackingViewModel {
   final FirebaseService _firebaseService = locator<FirebaseService>();
+  final NavigationService _navigationService = locator<NavigationService>();
 
   late ClubDetails club;
 
@@ -64,6 +67,8 @@ class AddEventViewModel extends IndexTrackingViewModel {
   String? location;
 
   List<PromoterModel> selectedPromoters = [];
+
+  TextEditingController eventFullAddressController = TextEditingController();
 
   void updateShowRatio() {
     showRatio = !showRatio;
@@ -124,19 +129,31 @@ class AddEventViewModel extends IndexTrackingViewModel {
           bookedPasses: <String>[],
           remainingPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
           maxTables: !showRatio ? int.parse(tableCountTextController.text) : 0,
-          totalMale: !showRatio ? int.parse(maleCountTextController.text) : 0,
-          totalFemale:
-              !showRatio ? int.parse(femaleCountTextController.text) : 0,
-          totalTable: !showRatio ? int.parse(tableCountTextController.text) : 0,
+          totalMale: 0,
+          totalFemale: 0,
+          totalTable: 0,
+          completeLocation: eventFullAddressController.text,
         );
 
         log("Created Event: " + event.toJson().toString());
-        await _firebaseService.createEvent(event.toJson());
+        final result = await _navigationService.navigateTo(
+            Routes.eventDetailsView,
+            arguments: EventDetailsViewArguments(
+                event: event, eventDisplayType: EventDisplayType.preview));
+        if (result ?? false) {
+          await _firebaseService.createEvent(event.toJson());
+          _navigationService.navigateTo(Routes.clubHomeScreen);
+        }
       }
     } catch (e) {
       await locator<DialogService>().showDialog(
           title: "Something went wrong!",
           description: "Please check all the fields have valid data!");
     }
+  }
+
+  removeThumbnail() {
+    coverPhoto = null;
+    notifyListeners();
   }
 }

@@ -7,7 +7,6 @@ import 'package:bookario_manager/components/size_config.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 
-import 'add_event.dart';
 import 'add_event_viewmodel.dart';
 
 Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
@@ -27,11 +26,40 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                         _showPicker(context, viewModel);
                       },
                       child: viewModel.coverPhoto != null
-                          ? Image.file(
-                              viewModel.coverPhoto!,
-                              width: SizeConfig.screenWidth * 0.9,
-                              height: 150,
-                              fit: BoxFit.fitHeight,
+                          ? Stack(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey,
+                                      border: Border.all(color: Colors.white)),
+                                  child: Image.file(
+                                    viewModel.coverPhoto!,
+                                    width: SizeConfig.screenWidth * 0.9,
+                                    height: 150,
+                                    fit: BoxFit.fitHeight,
+                                  ),
+                                ),
+                                Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: InkWell(
+                                        onTap: () =>
+                                            viewModel.removeThumbnail(),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          color: kSecondaryColor,
+                                          child: const Icon(
+                                            Icons.close_rounded,
+                                            color: Colors.white,
+                                            size: 26,
+                                          ),
+                                        ),
+                                      ),
+                                    )),
+                              ],
                             )
                           : Container(
                               decoration: const BoxDecoration(
@@ -75,6 +103,10 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                     ),
                   ),
                   buildLocationSelectionDropDown(viewModel, context),
+                  CustomTextFormField(
+                      fieldTitle: "Event location",
+                      fieldController: viewModel.eventFullAddressController,
+                      fieldHint: "Enter full address"),
                   CustomNumberFormField(
                       fieldTitle: "Total Capacity",
                       fieldController: viewModel.totalCapacityTextController,
@@ -90,7 +122,7 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                         ),
                         Row(
                           children: [
-                            const Text("Manual"),
+                            const Text("Auto"),
                             Container(
                               margin: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
@@ -112,21 +144,7 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                       ],
                     ),
                   ),
-                  if (!viewModel.showRatio) ...[
-                    CustomNumberFormField(
-                      fieldTitle: "Male Count",
-                      fieldController: viewModel.maleCountTextController,
-                      fieldHint: "Total Male Count",
-                    ),
-                    CustomNumberFormField(
-                        fieldTitle: "Female Count",
-                        fieldController: viewModel.femaleCountTextController,
-                        fieldHint: "Total Female Count"),
-                    CustomNumberFormField(
-                        fieldTitle: "Couples Count",
-                        fieldController: viewModel.couplesCountTextController,
-                        fieldHint: "Total Couples Count"),
-                  ] else
+                  if (viewModel.showRatio)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Row(

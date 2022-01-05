@@ -12,15 +12,6 @@ class ClubCard extends StatelessWidget {
 
   final ClubDetails club;
 
-  // final LocalStorageService _localStorageService =
-  //     locator<LocalStorageService>();
-  // @override
-  // void initState() {
-  //   _localStorageService.setter(
-  //       "clubId ${widget.club['clubId']}", widget.club['clubId'].toString());
-  //   super.initState();
-  // }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(

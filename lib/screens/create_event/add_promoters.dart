@@ -5,7 +5,7 @@ import 'package:bookario_manager/screens/create_event/add_event_viewmodel.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
-addPromoters(AddEventViewModel viewModel, BuildContext context) {
+addPromoters(viewModel, BuildContext context) {
   return Column(
     children: [
       ...[
@@ -38,6 +38,11 @@ addPromoters(AddEventViewModel viewModel, BuildContext context) {
           ),
         ),
       ],
+      DefaultButton(
+          press: () {
+            viewModel.setIndex(viewModel.currentIndex - 1);
+          },
+          text: "Back"),
       DefaultButton(press: () => viewModel.createEvent(), text: "Create"),
     ],
   );

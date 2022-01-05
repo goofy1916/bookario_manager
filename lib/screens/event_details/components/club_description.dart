@@ -31,7 +31,7 @@ class EventDescription extends StatelessWidget {
           style: Theme.of(context)
               .textTheme
               .headline6!
-              .copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+              .copyWith(fontWeight: FontWeight.bold, color: kSecondaryColor),
         ),
         Padding(
           padding: EdgeInsets.symmetric(
@@ -50,69 +50,104 @@ class EventDescription extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.only(top: 15),
                   child: SelectableText(
-                    event.location,
-                    maxLines: 2,
-                    style: const TextStyle(color: Colors.white54),
+                    "Where : " + event.completeLocation + "\n" + event.location,
+                    maxLines: 5,
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ),
             ],
           ),
         ),
+        const SpacingWidget(),
         Row(
           children: [
             SvgPicture.asset(
               "assets/icons/clock.svg",
               height: getProportionateScreenWidth(14),
             ),
-            Text(
-              ' ${getTimeOfEvent(event.dateTime)}',
-              style: const TextStyle(color: Colors.white54),
-            ),
+            TextRow(
+                text1: " What time",
+                text2: " : ${getTimeOfEvent(event.dateTime)}")
           ],
         ),
-        const Padding(
-          padding: EdgeInsets.only(
-            top: 25,
-          ),
-          child: Text(
-            "About the event",
-            style: TextStyle(fontSize: 18, color: Colors.white70),
-          ),
+        const SpacingWidget(),
+        Row(
+          children: [
+            Icon(
+              Icons.calendar_today_rounded,
+              size: getProportionateScreenWidth(14),
+              color: Colors.white,
+            ),
+            TextRow(
+                text1: " On date ",
+                text2: ": ${getDateOfEvent(event.dateTime)}"),
+          ],
+        ),
+        const SpacingWidget(),
+        const Text(
+          "About the event",
+          style: TextStyle(fontSize: 18, color: kSecondaryColor),
         ),
         DescriptionTextWidget(text: event.desc),
-        Padding(
-          padding: const EdgeInsets.only(
-            top: 25,
+        const SpacingWidget(),
+        TextRow(
+            text1: "Promoters ",
+            text2: ": ${viewModel.event.promoters?.length}"),
+        Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.white),
+              borderRadius: BorderRadius.circular(8)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...List.generate(
+                viewModel.event.promoters?.length ?? 0,
+                (index) => Column(
+                  children: [
+                    Text(
+                      viewModel.event.promoters?[index],
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    divider()
+                  ],
+                ),
+              )
+            ],
           ),
-          child: Text(
-            "Booked Passes: ${viewModel.event.bookedPasses?.length}",
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.white70,
-              fontWeight: FontWeight.bold,
+        ),
+        const SizedBox(height: 10),
+        Center(
+          child: MaterialButton(
+            color: Colors.grey[800],
+            onPressed: () {
+              viewModel.getPromoters();
+            },
+            child: const Text(
+              "Add Promoters",
+              style: TextStyle(color: Colors.white70),
             ),
           ),
         ),
+        const SpacingWidget(),
+        TextRow(
+            text1: "Booked Passes ",
+            text2: ": ${viewModel.event.bookedPasses?.length}"),
         Text(
-          "Total male: ${viewModel.event.totalMale}\nTotal female: ${viewModel.event.totalFemale}\nTotal tables: ${viewModel.event.totalTable}",
+          "Male: ${viewModel.event.totalMale}, Female: ${viewModel.event.totalFemale}, Tables: ${viewModel.event.totalTable}",
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 14,
             color: Colors.white70,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.normal,
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.only(
-            top: 25,
-          ),
-          child: Text(
-            "Available Passes:",
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.white70,
-              fontWeight: FontWeight.bold,
-            ),
+        const SpacingWidget(),
+        const Text(
+          "Available Passes :",
+          style: TextStyle(
+            fontSize: 18,
+            color: kSecondaryColor,
+            fontWeight: FontWeight.bold,
           ),
         ),
         AllPrices(
@@ -120,30 +155,37 @@ class EventDescription extends StatelessWidget {
           viewModel: viewModel,
         ),
         const SizedBox(height: 20),
-        MaterialButton(
-          color: Colors.grey[800],
-          onPressed: () {
-            viewModel.createPasses();
-          },
-          child: const Text(
-            "Add Passes",
-            style: TextStyle(color: Colors.white70),
+        Center(
+          child: MaterialButton(
+            color: Colors.grey[800],
+            onPressed: () {
+              viewModel.createPasses();
+            },
+            child: const Text(
+              "Add Passes",
+              style: TextStyle(color: Colors.white70),
+            ),
           ),
         ),
-        const SizedBox(height: 20),
-        const Divider(
-          color: Colors.white,
-        ),
+        const SpacingWidget(),
         if (viewModel.addNewCoupon)
           CouponForm(viewModel: viewModel)
         else
           SizedBox(
             width: SizeConfig.screenWidth,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Text(
+                  "Coupons for this event :",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: kSecondaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 if (!viewModel.busy("coupons") &&
                     viewModel.couponsForEvent.isNotEmpty) ...[
-                  whiteTextField("Coupons for this event:"),
                   Column(
                     children: viewModel.couponsForEvent
                         .map(
@@ -161,14 +203,19 @@ class EventDescription extends StatelessWidget {
                         .toList(),
                   ),
                 ],
-                MaterialButton(
-                  color: Colors.grey[800],
-                  onPressed: () {
-                    viewModel.newCoupon();
-                  },
-                  child: const Text(
-                    "Add coupon",
-                    style: TextStyle(color: Colors.white70),
+                const SizedBox(
+                  height: 20,
+                ),
+                Center(
+                  child: MaterialButton(
+                    color: Colors.grey[800],
+                    onPressed: () {
+                      viewModel.newCoupon();
+                    },
+                    child: const Text(
+                      "Add coupon",
+                      style: TextStyle(color: Colors.white70),
+                    ),
                   ),
                 ),
               ],
@@ -214,6 +261,27 @@ class EventDescription extends StatelessWidget {
         InkWell(
             onTap: () => viewModel.removeCoupon(coupon),
             child: const Icon(Icons.remove_circle, color: kPrimaryLightColor)),
+      ],
+    );
+  }
+}
+
+class SpacingWidget extends StatelessWidget {
+  const SpacingWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(
+          height: 10,
+        ),
+        divider(),
+        const SizedBox(
+          height: 10,
+        ),
       ],
     );
   }
@@ -406,6 +474,25 @@ class CouponCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class TextRow extends StatelessWidget {
+  const TextRow({Key? key, required this.text1, required this.text2})
+      : super(key: key);
+
+  final String text1;
+  final String text2;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(text1,
+            style: const TextStyle(color: kSecondaryColor, fontSize: 18)),
+        Text(text2, style: const TextStyle(color: kPrimaryColor, fontSize: 18))
+      ],
     );
   }
 }

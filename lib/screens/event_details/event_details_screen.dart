@@ -1,5 +1,6 @@
 import 'package:bookario_manager/components/custom_number_field.dart';
 import 'package:bookario_manager/components/default_button.dart';
+import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/components/hovering_back_button.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/event_model.dart';
@@ -10,13 +11,16 @@ import 'package:stacked/stacked.dart';
 
 class EventDetailsView extends StatelessWidget {
   final EventModel event;
+  final EventDisplayType eventDisplayType;
 
-  const EventDetailsView({Key? key, required this.event}) : super(key: key);
+  const EventDetailsView(
+      {Key? key, required this.event, required this.eventDisplayType})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<EventDetailsViewModel>.reactive(
-      onModelReady: (viewModel) => viewModel.updateEvent(event),
+      onModelReady: (viewModel) => viewModel.updateCoupons(event),
       builder: (context, viewModel, child) {
         return SafeArea(
           child: Scaffold(
@@ -29,28 +33,30 @@ class EventDetailsView extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              actions: [
-                InkWell(
-                  onTap: () => showCrowdBalance(viewModel, context),
-                  child: const Center(
-                    child: Icon(Icons.person_add_alt_1_rounded),
-                  ),
-                ),
-                const SizedBox(
-                  width: 16,
-                ),
-                InkWell(
-                  onTap: () => viewModel.checkAllPasses(),
-                  child: const Center(
-                    child: Icon(
-                      Icons.list_alt_rounded,
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 8,
-                )
-              ],
+              actions: eventDisplayType == EventDisplayType.preview
+                  ? []
+                  : [
+                      InkWell(
+                        onTap: () => showCrowdBalance(viewModel, context),
+                        child: const Center(
+                          child: Icon(Icons.person_add_alt_1_rounded),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 16,
+                      ),
+                      InkWell(
+                        onTap: () => viewModel.checkAllPasses(),
+                        child: const Center(
+                          child: Icon(
+                            Icons.list_alt_rounded,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      )
+                    ],
             ),
             body: SingleChildScrollView(
               child: Column(
@@ -61,7 +67,7 @@ class EventDetailsView extends StatelessWidget {
                   Stack(
                     children: [
                       Hero(
-                        tag: event.id!,
+                        tag: event.id ?? "",
                         child: Image.network(
                           event.eventThumbnail,
                           fit: BoxFit.cover,
@@ -101,10 +107,14 @@ class EventDetailsView extends StatelessWidget {
                 ],
               ),
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () => viewModel.goToQrCodeScanner(viewModel),
-              child: const Icon(Icons.qr_code_scanner),
-            ),
+            floatingActionButton: eventDisplayType == EventDisplayType.preview
+                ? FloatingActionButton(
+                    onPressed: () => viewModel.handleBack(true),
+                    child: const Icon(Icons.check))
+                : FloatingActionButton(
+                    onPressed: () => viewModel.goToQrCodeScanner(viewModel),
+                    child: const Icon(Icons.qr_code_scanner),
+                  ),
           ),
         );
       },

@@ -13,6 +13,7 @@ class EventModel {
   final int maleRatio;
   final String eventThumbnail;
   final String location;
+  final String completeLocation;
   final List<PassType> stagFemaleEntry;
   final List<PassType> stagMaleEntry;
   final List<PassType> coupleEntry;
@@ -36,6 +37,7 @@ class EventModel {
     required this.maleRatio,
     required this.eventThumbnail,
     required this.location,
+    required this.completeLocation,
     required this.stagFemaleEntry,
     required this.stagMaleEntry,
     required this.coupleEntry,
@@ -101,6 +103,7 @@ class EventModel {
       totalFemale: json['totalFemale'] as int,
       totalTable: json['totalTable'] as int,
       promoters: (json['promoters'] as List?) ?? [],
+      completeLocation: json['completeLocation'] as String,
     );
   }
   Map<String, dynamic> toJson() {
@@ -131,7 +134,8 @@ class EventModel {
       "totalTable": totalTable,
       "bookedPasses": bookedPasses,
       "remainingPasses": remainingPasses,
-      "promoters": promoters
+      "promoters": promoters,
+      "completeLocation": completeLocation,
     };
   }
 }

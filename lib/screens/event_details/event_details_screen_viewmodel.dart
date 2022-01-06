@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:bookario_manager/app.locator.dart';
 import 'package:bookario_manager/app.router.dart';
+import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
 import 'package:bookario_manager/models/pass_type_model.dart';
@@ -36,6 +37,8 @@ class EventDetailsViewModel extends BaseViewModel {
 
   TextEditingController femaleCountController =
       TextEditingController(text: "0");
+
+  var clubName;
 
   updateIsCouponPercent(bool value) {
     isCouponPercent = value;
@@ -192,5 +195,12 @@ class EventDetailsViewModel extends BaseViewModel {
         _navigationService.back(result: true);
       }
     }
+  }
+
+  EventDetailsType selectedEventDetailsType = EventDetailsType.passes;
+
+  toggleDetailType(EventDetailsType eventDetailsType) {
+    selectedEventDetailsType = eventDetailsType;
+    notifyListeners();
   }
 }

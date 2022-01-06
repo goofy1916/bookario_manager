@@ -32,6 +32,10 @@ class HomeScreenViewModel extends BaseViewModel {
     setBusy(true);
     myClubs = await _firebaseService
         .getMyClubs(_authenticationService.currentUser!.id!);
+    if (myClubs?.length == 1) {
+      _navigationService.navigateTo(Routes.clubDetailsView,
+          arguments: ClubDetailsViewArguments(club: myClubs!.first));
+    }
     hasClubs = true;
     setBusy(false);
   }

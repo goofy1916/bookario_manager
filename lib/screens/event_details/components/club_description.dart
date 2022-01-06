@@ -1,15 +1,22 @@
 import 'package:bookario_manager/components/constants.dart';
 import 'package:bookario_manager/components/default_button.dart';
 import 'package:bookario_manager/components/description_text.dart';
+import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
+import 'package:bookario_manager/screens/event_details/components/event_details_tab_bar.dart';
+import 'package:bookario_manager/screens/event_details/components/event_details_type_widget.dart';
 import 'package:bookario_manager/screens/event_details/event_details_screen_viewmodel.dart';
 import 'package:clipboard/clipboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'all_prices.dart';
+
+Color bodyTextColor = Colors.white;
 
 class EventDescription extends StatelessWidget {
   const EventDescription({
@@ -21,246 +28,104 @@ class EventDescription extends StatelessWidget {
   final EventModel event;
   final EventDetailsViewModel viewModel;
 
+  Widget getTimeOfEvent(Timestamp dateTime) {
+    final DateTime temp =
+        DateTime.fromMicrosecondsSinceEpoch(dateTime.microsecondsSinceEpoch);
+    return Text(
+      "${temp.hour}:${temp.minute < 10 ? "0${temp.minute}" : temp.minute}",
+      style: TextStyle(color: bodyTextColor, fontSize: 18),
+    );
+  }
+
+  Widget getDateOfEvent(Timestamp dateTime) {
+    final formatter = DateFormat("MMM");
+    final DateTime date = dateTime.toDate();
+    return Column(
+      children: [
+        Text(
+          formatter.format(date),
+          style: const TextStyle(
+            color: kPrimaryColor,
+            fontSize: 18,
+          ),
+          textAlign: TextAlign.justify,
+        ),
+        Text(
+          date.day.toString(),
+          style: const TextStyle(
+            color: kPrimaryColor,
+            fontSize: 18,
+          ),
+          textAlign: TextAlign.justify,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          event.name,
-          style: Theme.of(context)
-              .textTheme
-              .headline6!
-              .copyWith(fontWeight: FontWeight.bold, color: kSecondaryColor),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: getProportionateScreenWidth(5),
-          ),
-          child: Row(
-            children: [
-              SvgPicture.asset(
-                "assets/icons/Location point.svg",
-                height: getProportionateScreenWidth(15),
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Flexible(
-                child: Container(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: SelectableText(
-                    "Where : " + event.completeLocation + "\n" + event.location,
-                    maxLines: 5,
-                    style: const TextStyle(color: Colors.white),
+        Row(
+          children: [
+            Column(
+              children: [
+                Container(
+                  width: 60,
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: kSecondaryColor,
+                  ),
+                  child: Center(
+                    child: getDateOfEvent(event.dateTime),
                   ),
                 ),
+                getTimeOfEvent(event.dateTime),
+              ],
+            ),
+            const SizedBox(
+              width: 12,
+            ),
+            Flexible(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.name,
+                    style: Theme.of(context).textTheme.headline4!.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: kSecondaryColor,
+                          height: 0.9,
+                        ),
+                  ),
+                  SelectableText(
+                    event.location,
+                    maxLines: 1,
+                    style: TextStyle(color: bodyTextColor, fontSize: 12),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        const SpacingWidget(),
-        Row(
-          children: [
-            SvgPicture.asset(
-              "assets/icons/clock.svg",
-              height: getProportionateScreenWidth(14),
             ),
-            TextRow(
-                text1: " What time",
-                text2: " : ${getTimeOfEvent(event.dateTime)}")
           ],
         ),
-        const SpacingWidget(),
-        Row(
-          children: [
-            Icon(
-              Icons.calendar_today_rounded,
-              size: getProportionateScreenWidth(14),
-              color: Colors.white,
-            ),
-            TextRow(
-                text1: " On date ",
-                text2: ": ${getDateOfEvent(event.dateTime)}"),
-          ],
-        ),
-        const SpacingWidget(),
         const Text(
           "About the event",
           style: TextStyle(fontSize: 18, color: kSecondaryColor),
         ),
         DescriptionTextWidget(text: event.desc),
-        const SpacingWidget(),
-        TextRow(
-            text1: "Promoters ",
-            text2: ": ${viewModel.event.promoters?.length}"),
-        Container(
-          decoration: BoxDecoration(
-              border: Border.all(color: Colors.white),
-              borderRadius: BorderRadius.circular(8)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...List.generate(
-                viewModel.event.promoters?.length ?? 0,
-                (index) => Column(
-                  children: [
-                    Text(
-                      viewModel.event.promoters?[index],
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    divider()
-                  ],
-                ),
-              )
-            ],
-          ),
+        const SizedBox(
+          height: 20,
         ),
-        const SizedBox(height: 10),
-        Center(
-          child: MaterialButton(
-            color: Colors.grey[800],
-            onPressed: () {
-              viewModel.getPromoters();
-            },
-            child: const Text(
-              "Add Promoters",
-              style: TextStyle(color: Colors.white70),
-            ),
-          ),
-        ),
-        const SpacingWidget(),
-        TextRow(
-            text1: "Booked Passes ",
-            text2: ": ${viewModel.event.bookedPasses?.length}"),
-        Text(
-          "Male: ${viewModel.event.totalMale}, Female: ${viewModel.event.totalFemale}, Tables: ${viewModel.event.totalTable}",
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.white70,
-            fontWeight: FontWeight.normal,
-          ),
-        ),
-        const SpacingWidget(),
-        const Text(
-          "Available Passes :",
-          style: TextStyle(
-            fontSize: 18,
-            color: kSecondaryColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        AllPrices(
-          event: event,
+        EventDetailsTabBar(
           viewModel: viewModel,
         ),
-        const SizedBox(height: 20),
-        Center(
-          child: MaterialButton(
-            color: Colors.grey[800],
-            onPressed: () {
-              viewModel.createPasses();
-            },
-            child: const Text(
-              "Add Passes",
-              style: TextStyle(color: Colors.white70),
-            ),
-          ),
+        const SizedBox(
+          height: 20,
         ),
-        const SpacingWidget(),
-        if (viewModel.addNewCoupon)
-          CouponForm(viewModel: viewModel)
-        else
-          SizedBox(
-            width: SizeConfig.screenWidth,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Coupons for this event :",
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: kSecondaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (!viewModel.busy("coupons") &&
-                    viewModel.couponsForEvent.isNotEmpty) ...[
-                  Column(
-                    children: viewModel.couponsForEvent
-                        .map(
-                          (coupon) => Card(
-                            color: kSecondaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: getCouponDetails(coupon),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
-                const SizedBox(
-                  height: 20,
-                ),
-                Center(
-                  child: MaterialButton(
-                    color: Colors.grey[800],
-                    onPressed: () {
-                      viewModel.newCoupon();
-                    },
-                    child: const Text(
-                      "Add coupon",
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-      ],
-    );
-  }
-
-  whiteTextField18(String text) {
-    return Text(text,
-        style: const TextStyle(color: Colors.white, fontSize: 18));
-  }
-
-  whiteTextField(String text) {
-    return Text(text,
-        style: const TextStyle(color: Colors.white, fontSize: 12));
-  }
-
-  getCouponDetails(CouponModel coupon) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (coupon.percentOff != null) ...[
-              whiteTextField18("Coupon type: Percent"),
-              whiteTextField(
-                  "Percent off: ${coupon.percentOff}%, Max discount: Rs.${coupon.maxAmount},"),
-              whiteTextField(
-                  "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
-              whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
-            ] else ...[
-              whiteTextField18("Coupon type: Flat off"),
-              whiteTextField("Max discount: Rs.${coupon.maxAmount},"),
-              whiteTextField(
-                  "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
-              whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
-            ]
-          ],
-        ),
-        InkWell(
-            onTap: () => viewModel.removeCoupon(coupon),
-            child: const Icon(Icons.remove_circle, color: kPrimaryLightColor)),
+        EventDetailsTypeWidget(viewModel: viewModel)
       ],
     );
   }

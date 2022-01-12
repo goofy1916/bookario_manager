@@ -16,8 +16,6 @@ class StartUpViewModel extends BaseViewModel {
 
     if (isLoggedIn) {
       _navigationService.clearStackAndShow(Routes.clubHomeScreen);
-    } else {
-      _navigationService.replaceWith(Routes.signInScreen);
     }
 
     setBusy(false);

@@ -1,4 +1,5 @@
-// ignore: file_names
+// ignore_for_file: file_names
+
 import 'package:bookario_manager/app.locator.dart';
 import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/services/firebase_service.dart';
@@ -14,7 +15,8 @@ class AddPromoterViewModel extends BaseViewModel {
 
   getPromoters(String eventId, List<String> promoterList) async {
     setBusy(true);
-    promoters = await _firebaseService.getPromoters();
+    promoters = await _firebaseService.getPromoters()
+      ..sort((PromoterModel a, PromoterModel b) => a.name.compareTo(b.name));
     selectedPromoters.addAll(promoters
         .where((element) => promoterList.contains(element.promoterId)));
     eventid = eventId;

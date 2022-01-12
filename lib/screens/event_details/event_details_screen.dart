@@ -1,9 +1,8 @@
+import 'dart:io';
+
 import 'package:bookario_manager/components/constants.dart';
-import 'package:bookario_manager/components/custom_number_field.dart';
-import 'package:bookario_manager/components/default_button.dart';
 import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/components/hovering_back_button.dart';
-import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/event_model.dart';
 import 'package:bookario_manager/screens/event_details/components/club_description.dart';
 import 'package:bookario_manager/screens/event_details/event_details_screen_viewmodel.dart';
@@ -21,18 +20,43 @@ class EventDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<EventDetailsViewModel>.reactive(
-      onModelReady: (viewModel) => viewModel.updateCoupons(event),
+      onModelReady: (viewModel) => viewModel.setEvent(event, eventDisplayType),
       builder: (context, viewModel, child) {
         return Scaffold(
           appBar: AppBar(
             leading: const HoveringBackButton(),
-            title: const Text(
-              "Event",
-              style: TextStyle(
+            title: Text(
+              eventDisplayType == EventDisplayType.preview
+                  ? "Preview"
+                  : "Event",
+              style: const TextStyle(
                 fontSize: 24,
                 color: Colors.white,
               ),
             ),
+            actions: eventDisplayType == EventDisplayType.preview
+                ? []
+                : [
+                    InkWell(
+                      onTap: viewModel.event.premium
+                          ? null
+                          : () => viewModel.makeEventPremium(),
+                      child: viewModel.event.premium
+                          ? const Icon(
+                              Icons.star,
+                              color: kSecondaryColor,
+                              size: 32,
+                            )
+                          : const Icon(
+                              Icons.star_border,
+                              color: kSecondaryColor,
+                              size: 32,
+                            ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    )
+                  ],
           ),
           body: Stack(
             children: [
@@ -43,9 +67,9 @@ class EventDetailsView extends StatelessWidget {
                       color: Colors.black,
                       height: MediaQuery.of(context).size.height / 2 - 100,
                       child: Hero(
-                        tag: event.id ?? "",
+                        tag: viewModel.event.id ?? "",
                         child: Image.network(
-                          event.eventThumbnail,
+                          viewModel.event.eventThumbnail,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -73,7 +97,7 @@ class EventDetailsView extends StatelessWidget {
                         children: [
                           const SizedBox(height: 20),
                           EventDescription(
-                            event: event,
+                            event: viewModel.event,
                             viewModel: viewModel,
                           ),
                           const SizedBox(height: 120),
@@ -84,38 +108,46 @@ class EventDetailsView extends StatelessWidget {
                 ),
               ),
               Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  width: double.infinity,
-                  color: kSecondaryColor,
-                  height: 80,
-                  child: InkWell(
-                    onTap: eventDisplayType == EventDisplayType.preview
-                        ? () => viewModel.handleBack(true)
-                        : () => viewModel.goToQrCodeScanner(viewModel),
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            height: 10,
+                alignment: eventDisplayType == EventDisplayType.preview
+                    ? Alignment.bottomRight
+                    : Alignment.bottomCenter,
+                child: eventDisplayType == EventDisplayType.preview
+                    ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: FloatingActionButton(
+                            backgroundColor: kSecondaryColor,
+                            onPressed: () => viewModel.handleBack(true),
+                            child: const Icon(Icons.check)),
+                      )
+                    : Container(
+                        width: double.infinity,
+                        color: kSecondaryColor,
+                        height: Platform.isIOS ? 80 : 60,
+                        child: InkWell(
+                          onTap: () => viewModel.goToQrCodeScanner(viewModel),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Column(
+                              children: [
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  "Scan",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headline6!
+                                      .copyWith(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
-                          Text(
-                            eventDisplayType == EventDisplayType.preview
-                                ? "Create"
-                                : "Scan",
-                            style:
-                                Theme.of(context).textTheme.headline6!.copyWith(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                ),
               ),
             ],
           ),

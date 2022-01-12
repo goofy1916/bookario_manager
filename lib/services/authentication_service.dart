@@ -29,8 +29,17 @@ class AuthenticationService {
         email: email,
         password: password,
       );
-      _populateCurrentUser(authResult.user);
-      return authResult.user;
+
+      if (await _firebaseService.checkUserInManager(authResult.user!.uid)) {
+        if (await _populateCurrentUser(authResult.user)) {
+          return authResult.user;
+        } else {
+          return null;
+        }
+      } else {
+        _firebaseAuth.signOut();
+        _navigationService.clearStackAndShow(Routes.signInScreen);
+      }
     } on FirebaseAuthException catch (e) {
       log(e.message.toString());
       return null;
@@ -45,7 +54,7 @@ class AuthenticationService {
       _navigationService.clearStackAndShow(Routes.signInScreen);
     }
     await _populateCurrentUser(user);
-    return user != null;
+    return _currentUser != null;
   }
 
   Future userLogout() async {
@@ -55,16 +64,26 @@ class AuthenticationService {
   Future _populateCurrentUser(User? user) async {
     if (user != null) {
       _currentUser = await _firebaseService.getUserProfile(user.uid);
-      if (_currentUser == null) {
-        _navigationService.replaceWith(Routes.userInputDetailsView,
+      if (_currentUser == null || _currentUser!.name.isEmpty) {
+        _navigationService.clearStackAndShow(Routes.userInputDetailsView,
             arguments: UserInputDetailsViewArguments(user: user));
+        return false;
       } else {
         _localStorageService.setter("uid", _currentUser!.id!);
+        return true;
       }
     }
   }
 
   Future<void> resetPassword(String email) async {
-    await _firebaseAuth.sendPasswordResetEmail(email: email);
+    try {
+      log(email);
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      locator<NavigationService>().back();
+    } catch (e) {
+      locator<DialogService>().showDialog(
+          title: "Error", description: "User with this email not found!");
+      log(e.toString());
+    }
   }
 }

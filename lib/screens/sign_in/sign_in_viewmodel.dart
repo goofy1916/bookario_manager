@@ -1,5 +1,6 @@
 import 'package:bookario_manager/app.locator.dart';
 import 'package:bookario_manager/app.router.dart';
+import 'package:bookario_manager/screens/sign_in/components/forgot_password.dart';
 import 'package:bookario_manager/services/authentication_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -54,5 +55,10 @@ class SignInViewModel extends BaseViewModel {
       _navigationService.clearStackAndShow(Routes.clubHomeScreen);
     }
     setBusy(false);
+  }
+
+  Future forgotPassword() async {
+    _navigationService.navigateTo(Routes.forgotPasswordView,
+        arguments: ForgotPasswordViewArguments(email: email));
   }
 }

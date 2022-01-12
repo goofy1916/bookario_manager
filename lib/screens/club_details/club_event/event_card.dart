@@ -9,9 +9,11 @@ class EventCard extends StatelessWidget {
   const EventCard({
     Key? key,
     required this.event,
+    required this.onEdit,
   }) : super(key: key);
 
   final EventModel event;
+  final Function() onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -29,45 +31,60 @@ class EventCard extends StatelessWidget {
         ),
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: SizedBox(
-              width: SizeConfig.screenWidth * 0.96,
-              child: Container(
-                padding: const EdgeInsets.all(0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white54),
+          width: SizeConfig.screenWidth * 0.96,
+          padding: const EdgeInsets.all(0),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white54),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Flexible(
+                flex: 3,
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    event.eventThumbnail,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                child: Row(
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 8,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Flexible(
-                      flex: 3,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          event.eventThumbnail,
-                          fit: BoxFit.cover,
-                        ),
+                    if (event.premium)
+                      const Text(
+                        "Premium Event",
+                        style: TextStyle(color: kSecondaryColor),
                       ),
-                    ),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      flex: 8,
-                      child: Text(
-                        event.name + '\n' + getDateOfEvent(event.dateTime),
-                        style: Theme.of(context).textTheme.headline6!.copyWith(
-                            fontSize: getProportionateScreenWidth(14),
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white70),
-                        softWrap: false,
-                        overflow: TextOverflow.fade,
-                      ),
+                    Text(
+                      event.name + '\n' + getDateOfEvent(event.dateTime),
+                      style: Theme.of(context).textTheme.headline6!.copyWith(
+                          fontSize: getProportionateScreenWidth(14),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white70),
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
                     ),
                   ],
                 ),
               ),
-            ),
+              Flexible(
+                  child: InkWell(
+                onTap: onEdit,
+                child: const SizedBox(
+                  width: 50,
+                  child: Icon(
+                    Icons.edit,
+                    color: kSecondaryColor,
+                  ),
+                ),
+              ))
+            ],
           ),
         ),
       ),

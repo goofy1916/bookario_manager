@@ -6,8 +6,8 @@ import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
 import 'package:bookario_manager/models/pass_type_model.dart';
-import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/services/firebase_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:stacked/stacked.dart';
@@ -16,6 +16,7 @@ import 'package:stacked_services/stacked_services.dart';
 class EventDetailsViewModel extends BaseViewModel {
   final FirebaseService _firebaseService = locator<FirebaseService>();
   final NavigationService _navigationService = locator<NavigationService>();
+  final DialogService _dialogService = locator<DialogService>();
 
   // *Coupon creation logic
   bool isCouponPercent = false;
@@ -33,12 +34,14 @@ class EventDetailsViewModel extends BaseViewModel {
 
   late EventModel event;
 
+  List<Map<String, dynamic>> promoterDetails = [];
+
   TextEditingController maleCountController = TextEditingController(text: "0");
 
   TextEditingController femaleCountController =
       TextEditingController(text: "0");
 
-  var clubName;
+  EventDisplayType eventDisplayType = EventDisplayType.edit;
 
   updateIsCouponPercent(bool value) {
     isCouponPercent = value;
@@ -88,15 +91,18 @@ class EventDetailsViewModel extends BaseViewModel {
         await _firebaseService.getCouponsForEvent(eventId: event.id);
   }
 
-  updateCoupons(EventModel currentEvent) async {
+  setEvent(EventModel currentEvent, EventDisplayType eventDisplayType) async {
     event = currentEvent;
+    this.eventDisplayType = eventDisplayType;
+
+    getPromoterPasses();
     setBusyForObject("coupons", true);
     await getCouponsForEvent();
     setBusyForObject("coupons", false);
   }
 
   removePass(String passType, PassType pass) async {
-    final response = await locator<DialogService>().showConfirmationDialog(
+    final response = await _dialogService.showConfirmationDialog(
         title: "Confirm",
         description: "Are you sure you want to remove this passes?");
     if (response!.confirmed) {
@@ -129,7 +135,7 @@ class EventDetailsViewModel extends BaseViewModel {
         arguments: CreatePassViewArguments(event: event));
     setBusy(true);
     if (result != null && result) {
-      event = await locator<FirebaseService>().getEvent(event.id!);
+      event = await _firebaseService.getEvent(event.id!);
     }
     setBusy(false);
   }
@@ -166,18 +172,19 @@ class EventDetailsViewModel extends BaseViewModel {
 
       notifyListeners();
     } catch (e) {
-      await locator<DialogService>()
-          .showDialog(title: "Invalid Values", description: "$e");
+      await _dialogService.showDialog(
+          title: "Invalid Values", description: "$e");
     }
   }
 
   refreshEvent() async {
+    log("Event refreshed");
     event = await _firebaseService.getEvent(event.id!);
     notifyListeners();
   }
 
   removeCoupon(CouponModel coupon) async {
-    final response = await locator<DialogService>().showConfirmationDialog(
+    final response = await _dialogService.showConfirmationDialog(
         title: "Caution",
         description: "Are you sure you want delete this coupon?");
     if (response?.confirmed ?? false) {
@@ -188,7 +195,7 @@ class EventDetailsViewModel extends BaseViewModel {
 
   handleBack(bool confirm) async {
     if (confirm) {
-      final response = await locator<DialogService>().showConfirmationDialog(
+      final response = await _dialogService.showConfirmationDialog(
           title: "Caution",
           description: "Are you sure you want create this event?");
       if (response?.confirmed ?? false) {
@@ -202,5 +209,38 @@ class EventDetailsViewModel extends BaseViewModel {
   toggleDetailType(EventDetailsType eventDetailsType) {
     selectedEventDetailsType = eventDetailsType;
     notifyListeners();
+  }
+
+  makeEventPremium() async {
+    final response = await _dialogService.showConfirmationDialog(
+        title: "Confirm",
+        description: "Are you sure you want make this Event Premium?");
+
+    if (response?.confirmed ?? false) {
+      final response = await _navigationService.navigateTo(Routes.makePayment,
+          arguments:
+              MakePaymentArguments(type: "Premium event", amount: 500.00));
+
+      if (response?[0] == "SUCCESS") {
+        Map<String, dynamic> transation = {
+          'type': "premium event",
+          'amount': 500,
+          'eventId': event.id!,
+          'dateTime': Timestamp.now(),
+          'transactionID': response[1],
+        };
+        await _firebaseService.makeEventPremium(event.id!, transation);
+        refreshEvent();
+      }
+    }
+  }
+
+  void getPromoterPasses() async {
+    for (final promoter in event.promoters ?? []) {
+      final passCount =
+          await _firebaseService.getPassesByPromoter(event.id!, promoter);
+      promoterDetails.add({"id": promoter, "passCount": passCount});
+    }
+    log("Promoter Passes:" + promoterDetails.toString());
   }
 }

@@ -2,6 +2,7 @@ import 'package:bookario_manager/components/constants.dart';
 import 'package:bookario_manager/components/custom_number_field.dart';
 import 'package:bookario_manager/components/custom_text_form_field.dart';
 import 'package:bookario_manager/components/default_button.dart';
+import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/components/loading.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:date_time_picker/date_time_picker.dart';
@@ -25,40 +26,42 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                       onTap: () {
                         _showPicker(context, viewModel);
                       },
-                      child: viewModel.coverPhoto != null
-                          ? Stack(
+                      child: viewModel.hasCoverPhoto
+                          ? Column(
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
                                       color: Colors.grey,
                                       border: Border.all(color: Colors.white)),
-                                  child: Image.file(
-                                    viewModel.coverPhoto!,
-                                    width: SizeConfig.screenWidth * 0.9,
-                                    height: 150,
-                                    fit: BoxFit.fitHeight,
-                                  ),
+                                  child: viewModel.createOrEdit ==
+                                          CreateOrEdit.create
+                                      ? Image.file(
+                                          viewModel.coverPhoto!,
+                                          fit: BoxFit.fitHeight,
+                                        )
+                                      : Image.network(
+                                          viewModel.event!.eventThumbnail,
+                                          fit: BoxFit.fitHeight,
+                                        ),
                                 ),
-                                Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(20),
-                                      child: InkWell(
-                                        onTap: () =>
-                                            viewModel.removeThumbnail(),
-                                        child: Container(
-                                          width: 32,
+                                const SizedBox(
+                                  height: 8,
+                                ),
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: InkWell(
+                                      onTap: () => viewModel.removeThumbnail(),
+                                      child: Container(
+                                          padding: const EdgeInsets.all(4),
                                           height: 32,
                                           color: kSecondaryColor,
-                                          child: const Icon(
-                                            Icons.close_rounded,
-                                            color: Colors.white,
-                                            size: 26,
-                                          ),
-                                        ),
-                                      ),
-                                    )),
+                                          child: const Center(
+                                              child: Text("Remove"))),
+                                    ),
+                                  ),
+                                ),
                               ],
                             )
                           : Container(
@@ -79,7 +82,8 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                   CustomTextFormField(
                       fieldTitle: "Description",
                       fieldController: viewModel.eventDescriptionTextController,
-                      fieldHint: "Enter short description for the event"),
+                      fieldHint: "Enter description for the event"),
+
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: DateTimePicker(
@@ -87,7 +91,10 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                       controller: viewModel.dateTimeTextController,
                       type: DateTimePickerType.dateTimeSeparate,
                       dateMask: 'd MMM, yyyy',
-                      firstDate: DateTime.now(),
+                      firstDate: viewModel.createOrEdit == CreateOrEdit.create
+                          ? DateTime.now()
+                          : DateTime.fromMicrosecondsSinceEpoch(
+                              viewModel.event!.dateTime.microsecondsSinceEpoch),
                       lastDate: DateTime(2100),
                       icon: const Icon(Icons.event),
                       dateLabelText: 'Date',
@@ -102,11 +109,10 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                       },
                     ),
                   ),
-                  buildLocationSelectionDropDown(viewModel, context),
-                  CustomTextFormField(
-                      fieldTitle: "Event location",
-                      fieldController: viewModel.eventFullAddressController,
-                      fieldHint: "Enter full address"),
+                  // CustomTextFormField(
+                  //     fieldTitle: "Event location",
+                  //     fieldController: viewModel.eventFullAddressController,
+                  //     fieldHint: "Enter full address"),
                   CustomNumberFormField(
                       fieldTitle: "Total Capacity",
                       fieldController: viewModel.totalCapacityTextController,
@@ -185,93 +191,24 @@ Column basicEventDetails(AddEventViewModel viewModel, BuildContext context) {
                       fieldHint: "Total table Count"),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: DefaultButton(
-                      text: "Next",
-                      press: () {
-                        viewModel.setIndex(viewModel.currentIndex + 1);
-                        // if (viewModel.formKey.currentState!.validate()) {
-                        //   viewModel.formKey.currentState!.save();
-                        // } else {
-                        //   showErrors(
-                        //       context, "Error\n\nCheck event details again.");
-                        // }
-                      },
-                    ),
+                    child: viewModel.createOrEdit == CreateOrEdit.create
+                        ? DefaultButton(
+                            text: "Create",
+                            press: () {
+                              viewModel.createEvent();
+                            },
+                          )
+                        : DefaultButton(
+                            text: "Update",
+                            press: () {
+                              viewModel.updateEvent();
+                            },
+                          ),
                   )
                 ],
               ),
       ),
     ],
-  );
-}
-
-buildLocationSelectionDropDown(
-    AddEventViewModel viewModel, BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: SizedBox(
-      height: 50,
-      child: DropdownButtonFormField<String>(
-        value: viewModel.location,
-        dropdownColor: kSecondaryColor,
-        style: const TextStyle(color: kPrimaryColor),
-        onChanged: (String? value) {
-          viewModel.location = value;
-        },
-        items:
-            viewModel.locations.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(
-              value,
-            ),
-          );
-        }).toList(),
-        validator: (value) => value == null ? 'Select location' : null,
-        decoration: const InputDecoration(
-          labelText: 'Location',
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        ),
-      ),
-    ),
-  );
-}
-
-Future showErrors(BuildContext context, String text) {
-  return showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.grey[900],
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(5),
-          ),
-        ),
-        title: Text(
-          text,
-          style: Theme.of(context)
-              .textTheme
-              .headline6!
-              .copyWith(fontSize: 17, color: Colors.white),
-        ),
-        actions: <Widget>[
-          MaterialButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            splashColor: kSecondaryColor,
-            child: Text(
-              "Ok",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText1!
-                  .copyWith(color: kSecondaryColor),
-            ),
-          ),
-        ],
-      );
-    },
   );
 }
 

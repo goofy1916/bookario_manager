@@ -13,6 +13,8 @@ import 'bottom_text.dart';
 import 'forgot_password.dart';
 
 class SignForm extends StatelessWidget {
+  const SignForm({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<SignInViewModel>.reactive(
@@ -26,7 +28,9 @@ class SignForm extends StatelessWidget {
                   SizedBox(height: getProportionateScreenHeight(30)),
                   buildPasswordFormField(viewModel, context),
                   SizedBox(height: getProportionateScreenHeight(25)),
-                  const ForgotPassword(),
+                  ForgotPassword(
+                    viewModel: viewModel,
+                  ),
                   FormError(errors: viewModel.errors),
                   SizedBox(height: getProportionateScreenHeight(20)),
                   DefaultButton(

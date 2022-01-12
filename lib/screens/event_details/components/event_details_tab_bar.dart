@@ -1,4 +1,5 @@
 import 'package:bookario_manager/components/constants.dart';
+import 'package:bookario_manager/components/custom_tab.dart';
 import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/screens/event_details/event_details_screen_viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -46,38 +47,6 @@ class EventDetailsTabBar extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class CustomTab extends StatelessWidget {
-  const CustomTab({
-    Key? key,
-    required this.text,
-    required this.function,
-    required this.isActive,
-  }) : super(key: key);
-
-  final String text;
-  final Function() function;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: function,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: isActive ? kSecondaryColor : Colors.black,
-          ),
-          height: 40,
-          child: Center(
-            child: Text(text),
-          ),
-        ),
       ),
     );
   }

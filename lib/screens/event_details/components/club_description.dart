@@ -3,7 +3,6 @@ import 'package:bookario_manager/components/default_button.dart';
 import 'package:bookario_manager/components/description_text.dart';
 import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/components/size_config.dart';
-import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
 import 'package:bookario_manager/screens/event_details/components/event_details_tab_bar.dart';
 import 'package:bookario_manager/screens/event_details/components/event_details_type_widget.dart';
@@ -11,10 +10,7 @@ import 'package:bookario_manager/screens/event_details/event_details_screen_view
 import 'package:clipboard/clipboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-
-import 'all_prices.dart';
 
 Color bodyTextColor = Colors.white;
 
@@ -119,34 +115,15 @@ class EventDescription extends StatelessWidget {
         const SizedBox(
           height: 20,
         ),
-        EventDetailsTabBar(
-          viewModel: viewModel,
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        EventDetailsTypeWidget(viewModel: viewModel)
-      ],
-    );
-  }
-}
-
-class SpacingWidget extends StatelessWidget {
-  const SpacingWidget({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(
-          height: 10,
-        ),
-        divider(),
-        const SizedBox(
-          height: 10,
-        ),
+        if (viewModel.eventDisplayType == EventDisplayType.edit) ...[
+          EventDetailsTabBar(
+            viewModel: viewModel,
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          EventDetailsTypeWidget(viewModel: viewModel)
+        ]
       ],
     );
   }

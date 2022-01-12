@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:bookario_manager/app.locator.dart';
 import 'package:bookario_manager/models/club_details.dart';
 import 'package:bookario_manager/models/coupon_model.dart';
 import 'package:bookario_manager/models/event_model.dart';
@@ -9,9 +10,10 @@ import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fs;
+import 'package:stacked_services/stacked_services.dart';
 
 class FirebaseService {
-  final CollectionReference _usersCollectionReference =
+  final CollectionReference _managersCollectionReference =
       FirebaseFirestore.instance.collection('managers');
   final CollectionReference _clubCollectionReference =
       FirebaseFirestore.instance.collection('clubs');
@@ -23,12 +25,14 @@ class FirebaseService {
       FirebaseFirestore.instance.collection('locations');
   final CollectionReference _passesCollectionReference =
       FirebaseFirestore.instance.collection('passes');
+  final CollectionReference _transactionsCollectionReference =
+      FirebaseFirestore.instance.collection('transaction');
 
   Future updateUser(
     UserModel user,
   ) async {
     try {
-      await _usersCollectionReference.doc(user.id).set(
+      await _managersCollectionReference.doc(user.id).set(
             user.toJson(),
           );
     } catch (e) {
@@ -38,19 +42,34 @@ class FirebaseService {
 
   Future<UserModel?> getUserProfile(String uid) async {
     try {
-      final userData = await _usersCollectionReference.doc(uid).get();
-      return UserModel.fromJson(
-        userData.data()! as Map<String, dynamic>,
-        userData.id,
-      );
+      final userData = await _managersCollectionReference.doc(uid).get();
+      if (userData.data() != null) {
+        return UserModel.fromJson(
+          userData.data()! as Map<String, dynamic>,
+          userData.id,
+        );
+      } else {
+        return null;
+      }
     } catch (e) {
       log(e.toString());
     }
   }
 
+  Future<bool> checkUserInManager(String userId) async {
+    final result = await _managersCollectionReference.doc(userId).get();
+    if (result.exists) {
+      return true;
+    } else {
+      await locator<DialogService>()
+          .showDialog(title: "Sorry!", description: "Manager doesn't exist!");
+      return false;
+    }
+  }
+
   Future createUser(UserModel user) async {
     try {
-      await _usersCollectionReference.doc(user.id).set(
+      await _managersCollectionReference.doc(user.id).set(
             user.toJson(),
           );
     } catch (e) {
@@ -78,8 +97,8 @@ class FirebaseService {
     for (final doc in response.docs) {
       events.add(
           EventModel.fromJson(doc.data()! as Map<String, dynamic>, doc.id));
+      log((doc.data() as Map<String, dynamic>?).toString());
     }
-
     return events;
   }
 
@@ -90,6 +109,22 @@ class FirebaseService {
       promoters.add(PromoterModel.fromJson(doc.data() as Map<String, dynamic>));
     }
     return promoters;
+  }
+
+  getPassesByPromoter(String eventId, String promoterId) async {
+    int passes = 0;
+    final response = await _passesCollectionReference
+        .where("eventId", isEqualTo: eventId)
+        .where("promoterId", isEqualTo: promoterId)
+        .get();
+
+    for (final doc in response.docs) {
+      passes += int.tryParse((doc.data() as Map<String, dynamic>)['passes']
+              .length
+              .toString()) ??
+          0;
+    }
+    return passes;
   }
 
   Future<List<String>> getLocations() async {
@@ -107,9 +142,6 @@ class FirebaseService {
         fs.FirebaseStorage.instance.ref().child('eventsThumbnails/$eventName');
     fs.UploadTask uploadTask = firebaseStorageRef.putFile(imageFile);
     fs.TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    taskSnapshot.ref.getDownloadURL().then(
-          (value) => print("Done: $value"),
-        );
     return taskSnapshot.ref.getDownloadURL();
   }
 
@@ -117,6 +149,12 @@ class FirebaseService {
     Map<String, dynamic> json,
   ) async {
     await _eventsCollectionReference.doc().set(json);
+  }
+
+  Future<void> update(Map<String, dynamic> json, String eventId) async {
+    await _eventsCollectionReference
+        .doc(eventId)
+        .set(json, SetOptions(merge: true));
   }
 
   Future<void> updateEvent(Map<String, dynamic> json, String eventId) async {
@@ -237,5 +275,12 @@ class FirebaseService {
     await _eventsCollectionReference
         .doc(eventid)
         .set({"promoters": promoterList}, SetOptions(merge: true));
+  }
+
+  makeEventPremium(String eventId, Map<String, dynamic> transaction) async {
+    await _eventsCollectionReference
+        .doc(eventId)
+        .set({"premium": true}, SetOptions(merge: true));
+    await _transactionsCollectionReference.doc().set(transaction);
   }
 }

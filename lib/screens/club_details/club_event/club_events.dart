@@ -21,9 +21,12 @@ class ClubEvents extends StatelessWidget {
         child: Column(
           children: [
             ...List.generate(
-              viewModel.myEvents.length,
+              viewModel.getEvents.length,
               (index) {
-                return EventCard(event: viewModel.myEvents[index]);
+                return EventCard(
+                  event: viewModel.getEvents[index],
+                  onEdit: () => viewModel.editEvent(viewModel.getEvents[index]),
+                );
               },
             ),
             SizedBox(width: getProportionateScreenWidth(10)),

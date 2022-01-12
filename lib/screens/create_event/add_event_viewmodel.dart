@@ -19,6 +19,8 @@ class AddEventViewModel extends IndexTrackingViewModel {
   final NavigationService _navigationService = locator<NavigationService>();
 
   late ClubDetails club;
+  CreateOrEdit createOrEdit = CreateOrEdit.create;
+  EventModel? event;
 
   final formKey = GlobalKey<FormState>();
 
@@ -28,13 +30,11 @@ class AddEventViewModel extends IndexTrackingViewModel {
   FocusNode timeHrFocusNode = FocusNode();
   FocusNode timeMinFocusNode = FocusNode();
   FocusNode capacityFocusNode = FocusNode();
-  FocusNode maleCountFocusNode = FocusNode();
-  FocusNode femaleCountFocusNode = FocusNode();
-  FocusNode coupleCountFocusNode = FocusNode();
   FocusNode mfmRatioFocusNode = FocusNode();
   FocusNode mffRatioFocusNode = FocusNode();
   FocusNode pricesFocusNode = FocusNode();
 
+  bool hasCoverPhoto = false;
   File? coverPhoto;
   bool loading = false;
 
@@ -49,26 +49,11 @@ class AddEventViewModel extends IndexTrackingViewModel {
 
   bool showRatio = false;
 
-  TextEditingController maleCountTextController = TextEditingController();
-
-  TextEditingController femaleCountTextController = TextEditingController();
-
-  TextEditingController couplesCountTextController = TextEditingController();
-
   TextEditingController maleRatioTextController = TextEditingController();
 
   TextEditingController femaleRatioTextController = TextEditingController();
 
-  List<PromoterModel> promoters = [];
   TextEditingController tableCountTextController = TextEditingController();
-
-  List<String> locations = [];
-
-  String? location;
-
-  List<PromoterModel> selectedPromoters = [];
-
-  TextEditingController eventFullAddressController = TextEditingController();
 
   void updateShowRatio() {
     showRatio = !showRatio;
@@ -84,22 +69,70 @@ class AddEventViewModel extends IndexTrackingViewModel {
     }
   }
 
-  getPromotersAndLocation(ClubDetails currentClub) async {
+  setClub(ClubDetails currentClub, CreateOrEdit? createOrEdit,
+      EventModel? eventModel) async {
     setBusy(true);
     club = currentClub;
-    promoters = await _firebaseService.getPromoters();
-    locations = await _firebaseService.getLocations();
+    this.createOrEdit = createOrEdit ?? CreateOrEdit.create;
+    if (this.createOrEdit == CreateOrEdit.edit) {
+      event = eventModel;
+      updateControllers();
+    }
     setBusy(false);
   }
 
-  updateSelectedPromoters(List<PromoterModel> selection) {
-    selectedPromoters = selection;
-    notifyListeners();
-  }
+  updateEvent() async {
+    try {
+      if (formKey.currentState!.validate()) {
+        formKey.currentState!.save();
+        String? thumbnailURL;
+        if (coverPhoto != null) {
+          thumbnailURL = await _firebaseService.uploadImageToFirebase(
+              coverPhoto!, eventNameTextController.text);
+        }
 
-  removePromoter(String title) {
-    selectedPromoters.removeWhere((element) => element.name == title);
-    notifyListeners();
+        EventModel updatedEvent = EventModel(
+            clubId: club.id,
+            dateTime: Timestamp.fromDate(
+                DateTime.tryParse(dateTimeTextController.text)!),
+            desc: eventDescriptionTextController.text,
+            maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
+            name: eventNameTextController.text,
+            femaleRatio: event!.femaleRatio,
+            maleRatio: event!.maleRatio,
+            eventThumbnail: thumbnailURL ?? event!.eventThumbnail,
+            location: club.area!,
+            stagFemaleEntry: event!.stagFemaleEntry,
+            stagMaleEntry: event!.stagMaleEntry,
+            coupleEntry: event!.coupleEntry,
+            tableOption: event!.tableOption,
+            bookedPasses: event!.bookedPasses,
+            remainingPasses:
+                int.tryParse(totalCapacityTextController.text) ?? 0,
+            maxTables: int.parse(tableCountTextController.text),
+            totalMale: event!.totalMale,
+            totalFemale: event!.totalFemale,
+            totalTable: event!.totalTable,
+            completeLocation: club.address!,
+            premium: event!.premium);
+
+        log("Updated Event : " + updatedEvent.toJson().toString());
+
+        final result = await _navigationService.navigateTo(
+            Routes.eventDetailsView,
+            arguments: EventDetailsViewArguments(
+                event: updatedEvent,
+                eventDisplayType: EventDisplayType.preview));
+        if (result ?? false) {
+          await _firebaseService.updateEvent(updatedEvent.toJson(), event!.id!);
+          _navigationService.navigateTo(Routes.clubHomeScreen);
+        }
+      }
+    } catch (e) {
+      await locator<DialogService>().showDialog(
+          title: "Something went wrong!",
+          description: "Please check all the fields have valid data!");
+    }
   }
 
   createEvent() async {
@@ -111,31 +144,31 @@ class AddEventViewModel extends IndexTrackingViewModel {
             coverPhoto!, eventNameTextController.text);
 
         EventModel event = EventModel(
-          clubId: club.id,
-          dateTime: Timestamp.fromDate(
-              DateTime.tryParse(dateTimeTextController.text)!),
-          desc: eventDescriptionTextController.text,
-          maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
-          name: eventNameTextController.text,
-          femaleRatio:
-              showRatio ? int.parse(femaleRatioTextController.text) : 0,
-          maleRatio: showRatio ? int.parse(maleRatioTextController.text) : 0,
-          eventThumbnail: thumbnailURL,
-          location: location!,
-          stagFemaleEntry: [],
-          stagMaleEntry: [],
-          coupleEntry: [],
-          tableOption: [],
-          bookedPasses: <String>[],
-          remainingPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
-          maxTables: !showRatio ? int.parse(tableCountTextController.text) : 0,
-          totalMale: 0,
-          totalFemale: 0,
-          totalTable: 0,
-          completeLocation: eventFullAddressController.text,
-        );
+            clubId: club.id,
+            dateTime: Timestamp.fromDate(
+                DateTime.tryParse(dateTimeTextController.text)!),
+            desc: eventDescriptionTextController.text,
+            maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
+            name: eventNameTextController.text,
+            femaleRatio:
+                showRatio ? int.parse(femaleRatioTextController.text) : 0,
+            maleRatio: showRatio ? int.parse(maleRatioTextController.text) : 0,
+            eventThumbnail: thumbnailURL,
+            location: club.area!,
+            stagFemaleEntry: [],
+            stagMaleEntry: [],
+            coupleEntry: [],
+            tableOption: [],
+            bookedPasses: <String>[],
+            remainingPasses:
+                int.tryParse(totalCapacityTextController.text) ?? 0,
+            maxTables: int.parse(tableCountTextController.text),
+            totalMale: 0,
+            totalFemale: 0,
+            totalTable: 0,
+            completeLocation: club.address!,
+            premium: false);
 
-        log("Created Event: " + event.toJson().toString());
         final result = await _navigationService.navigateTo(
             Routes.eventDetailsView,
             arguments: EventDetailsViewArguments(
@@ -154,6 +187,29 @@ class AddEventViewModel extends IndexTrackingViewModel {
 
   removeThumbnail() {
     coverPhoto = null;
+    hasCoverPhoto = false;
     notifyListeners();
+  }
+
+  void updateControllers() {
+    hasCoverPhoto = true;
+    eventNameTextController = TextEditingController(text: event!.name);
+    eventDescriptionTextController = TextEditingController(text: event!.desc);
+
+    dateTimeTextController = TextEditingController(
+        text: DateTime.fromMicrosecondsSinceEpoch(
+                event!.dateTime.microsecondsSinceEpoch)
+            .toString());
+    totalCapacityTextController =
+        TextEditingController(text: event!.remainingPasses.toString());
+    if (event!.maleRatio > 0) {
+      showRatio = true;
+      maleRatioTextController =
+          TextEditingController(text: event!.maleRatio.toString());
+      femaleRatioTextController =
+          TextEditingController(text: event!.femaleRatio.toString());
+    }
+    tableCountTextController =
+        TextEditingController(text: event!.maxTables.toString());
   }
 }

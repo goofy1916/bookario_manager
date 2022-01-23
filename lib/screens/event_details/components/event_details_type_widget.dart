@@ -283,15 +283,15 @@ class EventDetailsTypeWidget extends StatelessWidget {
             if (coupon.percentOff != null) ...[
               whiteTextField18("Coupon type: Percent"),
               whiteTextField(
-                  "Percent off: ${coupon.percentOff}%, Max discount: Rs.${coupon.maxAmount},"),
+                  "Percent off: ${coupon.percentOff}%,\nMax discount: Rs.${coupon.maxAmount},"),
               whiteTextField(
-                  "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
+                  "Min amount required: Rs.${coupon.minAmountRequired},\nMax coupons: ${coupon.maxCoupons}"),
               whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
             ] else ...[
               whiteTextField18("Coupon type: Flat off"),
               whiteTextField("Max discount: Rs.${coupon.maxAmount},"),
               whiteTextField(
-                  "Min amount required: Rs.${coupon.minAmountRequired}, Max coupons: ${coupon.maxCoupons}"),
+                  "Min amount required: Rs.${coupon.minAmountRequired},\nMax coupons: ${coupon.maxCoupons}"),
               whiteTextField("Remaining coupons: ${coupon.remainingCoupons}"),
             ]
           ],

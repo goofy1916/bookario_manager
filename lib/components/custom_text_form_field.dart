@@ -24,7 +24,7 @@ class CustomTextFormField extends StatelessWidget {
         // focusNode: viewModel.nameFocusNode,
         controller: fieldController,
         validator: (String? val) {
-          if (val == null) {
+          if (val == null || val == "") {
             return "Enter valid value!";
           } else {
             return null;

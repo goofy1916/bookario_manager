@@ -1,8 +1,7 @@
 import 'package:bookario_manager/components/constants.dart';
-import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/components/size_config.dart';
 import 'package:bookario_manager/models/event_model.dart';
-import 'package:bookario_manager/screens/event_details/event_details_screen.dart';
+import 'package:bookario_manager/screens/club_details/club_details_screen_viewmodel.dart';
 import 'package:flutter/material.dart';
 
 class EventCard extends StatelessWidget {
@@ -10,10 +9,12 @@ class EventCard extends StatelessWidget {
     Key? key,
     required this.event,
     required this.onEdit,
+    required this.viewModel,
   }) : super(key: key);
 
   final EventModel event;
   final Function() onEdit;
+  final ClubDetailsViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +22,7 @@ class EventCard extends StatelessWidget {
       width: SizeConfig.screenWidth * .96,
       height: getProportionateScreenWidth(80),
       child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => EventDetailsView(
-                    event: event,
-                    eventDisplayType: EventDisplayType.edit,
-                  )),
-        ),
+        onTap: () => viewModel.goToEvent(event),
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),
           width: SizeConfig.screenWidth * 0.96,

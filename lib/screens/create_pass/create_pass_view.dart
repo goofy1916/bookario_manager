@@ -22,9 +22,17 @@ class CreatePassView extends StatelessWidget {
           (BuildContext context, CreatePassViewModel viewModel, Widget? child) {
         return SafeArea(
           child: Scaffold(
-            appBar: AppBar(title: const Text("Add passes")),
-            body: addPasses(viewModel, context),
-          ),
+              appBar: AppBar(title: const Text("Add passes")),
+              body: addPasses(viewModel, context),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  viewModel.addPassesToEvent();
+                },
+                backgroundColor: kSecondaryColor,
+                child: const Icon(
+                  Icons.check,
+                ),
+              )),
         );
       },
       viewModelBuilder: () => CreatePassViewModel(),
@@ -85,95 +93,88 @@ Widget _passType(
 
 addPasses(CreatePassViewModel viewModel, context) {
   return SingleChildScrollView(
-    child: Column(
-      children: [
-        const SizedBox(
-          height: 20,
-        ),
-        if (viewModel.selectedPassType == null) ...[
-          _passType(context, "Couple Pass", viewModel),
-          _passType(context, "Male Stag Pass", viewModel),
-          _passType(context, "Female Stag Pass", viewModel),
-          _passType(context, "Book Table", viewModel),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DefaultButton(
-                  text: "Add passes",
-                  press: () {
-                    viewModel.addPassesToEvent();
-                  },
-                ),
-              ),
-            ],
-          )
-        ] else ...[
-          Text(
-            "${viewModel.selectedPassType}",
-            style: const TextStyle(color: kSecondaryColor),
+    child: Form(
+      key: viewModel.formKey,
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 20,
           ),
-          if (viewModel.selectedPassType == couple)
-            getCouplePassInput(viewModel),
-          if (viewModel.selectedPassType == male) getMalePassInput(viewModel),
-          if (viewModel.selectedPassType == female)
-            getFemalePassInput(viewModel),
-          if (viewModel.selectedPassType == table) getTablePassInput(viewModel),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: MaterialButton(
-                  minWidth: 100,
-                  color: kSecondaryColor,
-                  onPressed: () {
-                    viewModel.clearSelectedPassType();
-                  },
-                  child: const Text("Cancel"),
+          if (viewModel.selectedPassType == null) ...[
+            _passType(context, "Couple Pass", viewModel),
+            _passType(context, "Male Stag Pass", viewModel),
+            _passType(context, "Female Stag Pass", viewModel),
+            _passType(context, "Book Table", viewModel),
+          ] else ...[
+            Text(
+              "${viewModel.selectedPassType}",
+              style: const TextStyle(color: kSecondaryColor),
+            ),
+            if (viewModel.selectedPassType == couple)
+              getCouplePassInput(viewModel),
+            if (viewModel.selectedPassType == male) getMalePassInput(viewModel),
+            if (viewModel.selectedPassType == female)
+              getFemalePassInput(viewModel),
+            if (viewModel.selectedPassType == table)
+              getTablePassInput(viewModel),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    minWidth: 100,
+                    color: kSecondaryColor,
+                    onPressed: () {
+                      viewModel.clearSelectedPassType();
+                    },
+                    child: const Text("Cancel"),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: MaterialButton(
-                  minWidth: 100,
-                  color: kSecondaryColor,
-                  onPressed: () {
-                    viewModel.addPass();
-                  },
-                  child: const Text("Add"),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    minWidth: 100,
+                    color: kSecondaryColor,
+                    onPressed: () {
+                      viewModel.addPass();
+                    },
+                    child: const Text("Add"),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ],
+          const Text(
+            "Added passes",
+            style: TextStyle(color: kSecondaryColor, fontSize: 20),
+          ),
+          const SizedBox(height: 20),
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                ...viewModel.couplePasses.map((e) {
+                  return e['passTitle'] != null
+                      ? customListTile(e, viewModel, couple)
+                      : const SizedBox.shrink();
+                }),
+                ...viewModel.malePasses.map((e) => e['passTitle'] != null
+                    ? customListTile(e, viewModel, male)
+                    : const SizedBox.shrink()),
+                ...viewModel.femalePasses.map((e) => e['passTitle'] != null
+                    ? customListTile(e, viewModel, female)
+                    : const SizedBox.shrink()),
+                ...viewModel.tablePasses.map((e) => e['passTitle'] != null
+                    ? customListTile(e, viewModel, table)
+                    : const SizedBox.shrink())
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 100,
           ),
         ],
-        const Text(
-          "Added passes",
-          style: TextStyle(color: kSecondaryColor, fontSize: 20),
-        ),
-        const SizedBox(height: 20),
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              ...viewModel.couplePasses.map((e) {
-                return e['passTitle'] != null
-                    ? customListTile(e, viewModel, couple)
-                    : const SizedBox.shrink();
-              }),
-              ...viewModel.malePasses.map((e) => e['passTitle'] != null
-                  ? customListTile(e, viewModel, male)
-                  : const SizedBox.shrink()),
-              ...viewModel.femalePasses.map((e) => e['passTitle'] != null
-                  ? customListTile(e, viewModel, female)
-                  : const SizedBox.shrink()),
-              ...viewModel.tablePasses.map((e) => e['passTitle'] != null
-                  ? customListTile(e, viewModel, table)
-                  : const SizedBox.shrink())
-            ],
-          ),
-        )
-      ],
+      ),
     ),
   );
 }

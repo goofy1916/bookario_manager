@@ -24,7 +24,7 @@ class CustomNumberFormField extends StatelessWidget {
         // focusNode: viewModel.nameFocusNode,
         controller: fieldController,
         validator: (String? val) {
-          if (val == null) {
+          if (val == null || val == "") {
             return "Enter valid value!";
           } else if (int.tryParse(val)! < 0) {
             return "Value cannot be less than 0";

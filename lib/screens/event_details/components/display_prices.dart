@@ -70,7 +70,7 @@ class ListofEntryPrices extends StatelessWidget {
                                     child: Text(
                                       "${pass.type} : ₹ ${pass.entry} " +
                                           ((pass.cover > 0.0)
-                                              ? "\n(Cover ₹${pass.cover}))"
+                                              ? "\n(Cover ₹${pass.cover})"
                                               : ""),
                                       style: const TextStyle(
                                         fontSize: 16,

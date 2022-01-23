@@ -6,7 +6,6 @@ import 'package:bookario_manager/app.router.dart';
 import 'package:bookario_manager/components/enum.dart';
 import 'package:bookario_manager/models/club_details.dart';
 import 'package:bookario_manager/models/event_model.dart';
-import 'package:bookario_manager/models/promoter_model.dart';
 import 'package:bookario_manager/services/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -98,8 +97,11 @@ class AddEventViewModel extends IndexTrackingViewModel {
             desc: eventDescriptionTextController.text,
             maxPasses: int.tryParse(totalCapacityTextController.text) ?? 0,
             name: eventNameTextController.text,
-            femaleRatio: event!.femaleRatio,
-            maleRatio: event!.maleRatio,
+            femaleRatio: showRatio
+                ? int.tryParse(femaleRatioTextController.text) ?? 0
+                : 0,
+            maleRatio:
+                showRatio ? int.tryParse(maleRatioTextController.text) ?? 0 : 0,
             eventThumbnail: thumbnailURL ?? event!.eventThumbnail,
             location: club.area!,
             stagFemaleEntry: event!.stagFemaleEntry,

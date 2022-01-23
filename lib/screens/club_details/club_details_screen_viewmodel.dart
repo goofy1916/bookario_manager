@@ -28,28 +28,28 @@ class ClubDetailsViewModel extends BaseViewModel {
   getMyEvents(
     ClubDetails club,
   ) async {
-    // try {
-    myClub = club;
-    setBusy(true);
-    upcomingEvents = [];
-    pastEvents = [];
-    myEvents = await _firebaseService.getMyEvents(club.id);
-    if (myEvents.isNotEmpty) {
-      hasEvents = true;
-    }
-    for (final event in myEvents) {
-      if (event.dateTime.toDate().isAfter(DateTime.now())) {
-        upcomingEvents.add(event);
-      } else {
-        pastEvents.add(event);
+    try {
+      myClub = club;
+      setBusy(true);
+      upcomingEvents = [];
+      pastEvents = [];
+      myEvents = await _firebaseService.getMyEvents(club.id);
+      if (myEvents.isNotEmpty) {
+        hasEvents = true;
       }
+      for (final event in myEvents) {
+        if (event.dateTime.toDate().isAfter(DateTime.now())) {
+          upcomingEvents.add(event);
+        } else {
+          pastEvents.add(event);
+        }
+      }
+      setBusy(false);
+      notifyListeners();
+    } catch (e) {
+      log("Club Details ViewModel" + e.toString());
+      setBusy(false);
     }
-    setBusy(false);
-    notifyListeners();
-    // } catch (e) {
-    //   log("Club Details ViewModel" + e.toString());
-    //   setBusy(false);
-    // }
   }
 
   toggleEventType(EventType type) {
@@ -61,7 +61,13 @@ class ClubDetailsViewModel extends BaseViewModel {
     await _navigationService.navigateTo(Routes.addEvent,
         arguments: AddEventArguments(
             club: myClub, event: event, createOrEdit: CreateOrEdit.edit));
+    getMyEvents(myClub);
+  }
 
+  goToEvent(EventModel event) async {
+    await _navigationService.navigateTo(Routes.eventDetailsView,
+        arguments: EventDetailsViewArguments(
+            event: event, eventDisplayType: EventDisplayType.edit));
     getMyEvents(myClub);
   }
 }

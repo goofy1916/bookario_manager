@@ -26,6 +26,7 @@ class ClubEvents extends StatelessWidget {
                 return EventCard(
                   event: viewModel.getEvents[index],
                   onEdit: () => viewModel.editEvent(viewModel.getEvents[index]),
+                  viewModel: viewModel,
                 );
               },
             ),

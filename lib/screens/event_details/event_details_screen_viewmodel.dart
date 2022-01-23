@@ -120,7 +120,7 @@ class EventDetailsViewModel extends BaseViewModel {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', 'Cancel', true, ScanMode.QR);
     log("QR code : " + barcodeScanRes);
-    if (barcodeScanRes.isNotEmpty) {
+    if (barcodeScanRes != "-1" && barcodeScanRes.isNotEmpty) {
       viewModel.checkScannedPass(barcodeScanRes);
     }
   }
@@ -164,13 +164,16 @@ class EventDetailsViewModel extends BaseViewModel {
 
   Future<void> balanceCrowd() async {
     try {
-      int maleCount = int.parse(maleCountController.text) + event.totalMale;
+      int maleCount =
+          (int.tryParse(maleCountController.text) ?? 0) + event.totalMale;
       int femaleCount =
-          int.parse(femaleCountController.text) + event.totalFemale;
+          (int.tryParse(femaleCountController.text) ?? 0) + event.totalFemale;
       await _firebaseService.updateCrowd(event.id!, maleCount, femaleCount);
       _navigationService.back();
-
-      notifyListeners();
+      await _dialogService.showDialog(title: "Crowd Updated!");
+      maleCountController.clear();
+      femaleCountController.clear();
+      refreshEvent();
     } catch (e) {
       await _dialogService.showDialog(
           title: "Invalid Values", description: "$e");
@@ -180,6 +183,7 @@ class EventDetailsViewModel extends BaseViewModel {
   refreshEvent() async {
     log("Event refreshed");
     event = await _firebaseService.getEvent(event.id!);
+    await getPromoterPasses();
     notifyListeners();
   }
 
@@ -235,7 +239,8 @@ class EventDetailsViewModel extends BaseViewModel {
     }
   }
 
-  void getPromoterPasses() async {
+  Future getPromoterPasses() async {
+    promoterDetails = [];
     for (final promoter in event.promoters ?? []) {
       final passCount =
           await _firebaseService.getPassesByPromoter(event.id!, promoter);

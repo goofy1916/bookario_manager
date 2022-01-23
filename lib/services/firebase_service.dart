@@ -80,7 +80,7 @@ class FirebaseService {
   Future<List<ClubDetails>?> getMyClubs(String uid) async {
     List<ClubDetails> _clubDetails = [];
     final response = await _clubCollectionReference
-        .where("members", arrayContains: uid)
+        .where("managers", arrayContains: uid)
         .get();
     for (final doc in response.docs) {
       _clubDetails.add(
@@ -97,7 +97,6 @@ class FirebaseService {
     for (final doc in response.docs) {
       events.add(
           EventModel.fromJson(doc.data()! as Map<String, dynamic>, doc.id));
-      log((doc.data() as Map<String, dynamic>?).toString());
     }
     return events;
   }
@@ -227,7 +226,6 @@ class FirebaseService {
     EventPass eventPass;
     try {
       final response = await _passesCollectionReference.doc(passId).get();
-      log(response.data().toString());
       if (response.exists) {
         eventPass =
             EventPass.fromJson(response.data() as Map<String, dynamic>, passId);

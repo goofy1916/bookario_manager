@@ -19,6 +19,7 @@ const String totalAllowedController = "totalAllowedController";
 
 class CreatePassViewModel extends BaseViewModel {
   String? selectedPassType;
+  final formKey = GlobalKey<FormState>();
 
   late EventModel currentEvent;
 
@@ -28,30 +29,30 @@ class CreatePassViewModel extends BaseViewModel {
 
   List<Map<String, dynamic>> couplePasses = [
     {
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController()
+      passNameController: TextEditingController(),
+      totalCostController: TextEditingController(),
+      totalCoverController: TextEditingController()
     }
   ];
   List<Map<String, dynamic>> malePasses = [
     {
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController()
+      passNameController: TextEditingController(),
+      totalCostController: TextEditingController(),
+      totalCoverController: TextEditingController()
     }
   ];
   List<Map<String, dynamic>> femalePasses = [
     {
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController()
+      passNameController: TextEditingController(),
+      totalCostController: TextEditingController(),
+      totalCoverController: TextEditingController()
     }
   ];
   List<Map<String, dynamic>> tablePasses = [
     {
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController(),
+      passNameController: TextEditingController(),
+      totalCostController: TextEditingController(),
+      totalCoverController: TextEditingController(),
       "totalAllowedController": TextEditingController(),
     }
   ];
@@ -75,58 +76,61 @@ class CreatePassViewModel extends BaseViewModel {
   }
 
   void addPass() {
-    final newEntry = <String, dynamic>{
-      "passNameController": TextEditingController(),
-      "totalCostController": TextEditingController(),
-      "totalCoverController": TextEditingController()
-    };
-    if (selectedPassType == couple) {
-      couplePasses[couplePasses.length - 1]['passTitle'] = couple +
-          "\n" +
-          couplePasses[couplePasses.length - 1][passNameController].text +
-          ": Cost : " +
-          couplePasses[couplePasses.length - 1][totalCostController].text +
-          ", Cover : " +
-          couplePasses[couplePasses.length - 1][totalCoverController].text;
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+      final newEntry = <String, dynamic>{
+        passNameController: TextEditingController(),
+        totalCostController: TextEditingController(),
+        totalCoverController: TextEditingController()
+      };
+      if (selectedPassType == couple) {
+        couplePasses[couplePasses.length - 1]['passTitle'] = couple +
+            "\n" +
+            couplePasses[couplePasses.length - 1][passNameController].text +
+            ": Cost : " +
+            couplePasses[couplePasses.length - 1][totalCostController].text +
+            ", Cover : " +
+            couplePasses[couplePasses.length - 1][totalCoverController].text;
 
-      couplePasses.add(newEntry);
-    }
-    if (selectedPassType == male) {
-      malePasses[malePasses.length - 1]['passTitle'] = male +
-          " Stag\n" +
-          malePasses[malePasses.length - 1][passNameController].text +
-          ": Cost : " +
-          malePasses[malePasses.length - 1][totalCostController].text +
-          ", Cover : " +
-          malePasses[malePasses.length - 1][totalCoverController].text;
-      malePasses.add(newEntry);
-    }
-    if (selectedPassType == female) {
-      femalePasses[femalePasses.length - 1]['passTitle'] = female +
-          " Stag\n" +
-          femalePasses[femalePasses.length - 1][passNameController].text +
-          ": Cost : " +
-          femalePasses[femalePasses.length - 1][totalCostController].text +
-          ", Cover : " +
-          femalePasses[femalePasses.length - 1][totalCoverController].text;
-      femalePasses.add(newEntry);
-    }
-    if (selectedPassType == table) {
-      tablePasses[tablePasses.length - 1]['passTitle'] = table +
-          "\n" +
-          tablePasses[tablePasses.length - 1][passNameController].text +
-          ": Cost : " +
-          tablePasses[tablePasses.length - 1][totalCostController].text +
-          ", Cover : " +
-          tablePasses[tablePasses.length - 1][totalCoverController].text +
-          ", Allowed : " +
-          tablePasses[tablePasses.length - 1][totalAllowedController].text;
-      tablePasses.add({
-        "passNameController": TextEditingController(),
-        "totalCostController": TextEditingController(),
-        "totalCoverController": TextEditingController(),
-        totalAllowedController: TextEditingController()
-      });
+        couplePasses.add(newEntry);
+      }
+      if (selectedPassType == male) {
+        malePasses[malePasses.length - 1]['passTitle'] = male +
+            " Stag\n" +
+            malePasses[malePasses.length - 1][passNameController].text +
+            ": Cost : " +
+            malePasses[malePasses.length - 1][totalCostController].text +
+            ", Cover : " +
+            malePasses[malePasses.length - 1][totalCoverController].text;
+        malePasses.add(newEntry);
+      }
+      if (selectedPassType == female) {
+        femalePasses[femalePasses.length - 1]['passTitle'] = female +
+            " Stag\n" +
+            femalePasses[femalePasses.length - 1][passNameController].text +
+            ": Cost : " +
+            femalePasses[femalePasses.length - 1][totalCostController].text +
+            ", Cover : " +
+            femalePasses[femalePasses.length - 1][totalCoverController].text;
+        femalePasses.add(newEntry);
+      }
+      if (selectedPassType == table) {
+        tablePasses[tablePasses.length - 1]['passTitle'] = table +
+            "\n" +
+            tablePasses[tablePasses.length - 1][passNameController].text +
+            ": Cost : " +
+            tablePasses[tablePasses.length - 1][totalCostController].text +
+            ", Cover : " +
+            tablePasses[tablePasses.length - 1][totalCoverController].text +
+            ", Allowed : " +
+            tablePasses[tablePasses.length - 1][totalAllowedController].text;
+        tablePasses.add({
+          passNameController: TextEditingController(),
+          totalCostController: TextEditingController(),
+          totalCoverController: TextEditingController(),
+          totalAllowedController: TextEditingController()
+        });
+      }
     }
     notifyListeners();
   }
